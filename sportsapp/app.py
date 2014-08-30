@@ -15,14 +15,12 @@ Options:
 import flask
 import logging
 from flask.ext.babel import Babel
-from models import db, User
+from models import db, User, Note, NoteKind
 from datetime import datetime
 from uuid import uuid4
-from docopt import docopt
 from oauth_adapter import OauthAdapter
+from response import AjaxResponse
 from logging.handlers import TimedRotatingFileHandler
-
-ARGS = docopt(__doc__, version='0.0.1')
 
 app = flask.Flask(__name__)
 
@@ -125,17 +123,31 @@ def note_detail(pk):
     return flask.render_template('note_detail.html', **context)
 
 
+# to-do make a api for create kind
+
 @app.route('/note/kind/create')
 def create_note_kind():
-    context = {}
-    return flask.render_template('note_kind_create.html', **context)
+    response = AjaxResponse()
+    try:
+        name = flask.request.args.get('name')
+        note_kind = NoteKind()
+        note_kind.name = name
+        note_kind.save()
+    except Exception, e:
+        response.status = 0
+        response.title = 'err'
+        response.message = e.message
+    return response.make_response()
+
+# to-do make a api for create note
 
 
 @app.route('/note/create/<int:pk>')
 def create_note(pk):
-    context = {}
-    return flask.render_template('note_create.html', **context)
+    pass
 
 
 if __name__ == "__main__":
+    from docopt import docopt
+    ARGS = docopt(__doc__, version='0.0.1')
     app.run("0.0.0.0", port=int(ARGS['--port']), debug=True)

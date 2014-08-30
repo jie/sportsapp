@@ -71,6 +71,35 @@ class User(db.Model, ModelBase):
     password = db.Column(db.String(40))
     oauth_id = db.Column(db.String(40))
     oauth_type = db.Column(db.String(12))
-    is_enable = db.Column(db.Boolean, default=True)
     create_at = db.Column(db.DateTime, server_default="current_timestamp")
     update_at = db.Column(db.DateTime)
+    is_enable = db.Column(db.Boolean, default=True)
+
+
+class NoteKind(db.Model, ModelBase):
+
+    __tablename__ = 'note_kind'
+
+    pk = db.Column('id', db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    update_at = db.Column(db.DateTime)
+    is_enable = db.Column(db.Boolean, default=True)
+    user = db.relationship('user')
+
+
+class Note(db.Model, ModelBase):
+
+    __tablename__ = 'note'
+
+    pk = db.Column('id', db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    kind_id = db.Column(db.Integer, db.ForeignKey('note_kind.id'))
+    quantity = db.Column(db.Integer)
+    content = db.Column(db.String)
+    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    update_at = db.Column(db.DateTime)
+    is_enable = db.Column(db.Boolean, default=True)
+    user = db.relationship('user')
+    kind = db.relationship('note_kind')
