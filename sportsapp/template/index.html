@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>SportsApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/framework7.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/framework7.themes.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/my-app.css') }}">
+
+</head>
+
+<body class="page layout-white">
+    {% include 'sections/login_page.html' %}
+    <!-- Status bar overlay for fullscreen mode-->
+    <div class="statusbar-overlay"></div>
+    <!-- Panels overlay-->
+    <div class="panel-overlay"></div>
+    <!-- Left panel with reveal effect-->
+    {% include 'sections/panel_left.html' %}
+    <!-- Right panel with cover effect-->
+    {% include 'sections/panel_right.html' %}
+
+    <!-- Views, and they are tabs-->
+    <!-- We need to set "toolbar-through" class on it to keep space for our tab bar-->
+    <div class="views tabs toolbar-through">
+        {% include 'views/views_home.html' %} {% include 'views/views_form.html' %} {% include 'views/views_more.html' %}
+        <!-- Bottom Tabbar-->
+        {% include 'sections/bottom_tabbar.html' %}
+    </div>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/framework7.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/cookies.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/my-app.js') }}"></script>
+</body>
+
+</html>

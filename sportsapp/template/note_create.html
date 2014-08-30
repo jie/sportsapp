@@ -1,0 +1,53 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="left sliding"><a href="index.html" class="back link"><i class="icon icon-back"></i><span>Back</span></a>
+        </div>
+        <div class="center sliding">{{ _('create a note') }}</div>
+    </div>
+</div>
+<div class="pages navbar-through">
+    <div data-page="about" class="page">
+        <div class="page-content">
+
+            <div class="content-block-title">{{ _('create a kind') }}</div>
+            <div class="list-block">
+                <ul>
+                    <li>
+                        <div class="item-content">
+                            <div class="item-inner">
+                                <div class="item-input">
+                                    <input type="text" placeholder="{{ _('quantity') }}" />
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="item-content">
+                            <div class="item-inner">
+                                <div class="item-input">
+                                    <textarea placeholder="{{ _('content') }}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="item-content">
+                            <div class="item-inner">
+                                <div class="item-input">
+                                    <input type="date" placeholder="{{ _('date') }}" />
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="list-block inset">
+                <ul>
+                    <li><a href="#" class="list-button item-link color-red">Big Red Button</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

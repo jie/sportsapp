@@ -1,0 +1,57 @@
+<div class="login-screen">
+    <!-- Default view-page layout -->
+    <div class="view">
+        <div class="page">
+            <!-- page-content has additional login-screen content -->
+            <div class="page-content login-screen-content">
+                <div class="login-screen-title">SportsApp</div>
+                <!-- Login form -->
+                <form action="{{ url_for('signin') }}" method="POST" class="signin-form">
+                    <div class="list-block">
+                        <ul>
+                            <li class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">{{ _('email') }}</div>
+                                    <div class="item-input">
+                                        <input type="text" name="email" placeholder="{{ _('email') }}">
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">{{ _('password') }}</div>
+                                    <div class="item-input">
+                                        <input type="password" name="password" placeholder="{{ _('password') }}">
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="list-block">
+                        <div class="row">
+                            <div class="col-50">
+                                <p><a href="#" type="submit" class="button button-big color-blue button-fill signin-btn">{{ _('signin') }}</a>
+                                </p>
+                            </div>
+                            <div class="col-50">
+                                <p class="buttons-row theme-blue">
+                                    <a href="{{ url_for('oauth2_signin', oauth_port='qq') }}" class="button button-big external">
+                                        <i class="icon iconfont icon-qq"></i>
+                                        {{ _('qq') }}
+                                    </a>
+                                    <a href="{{ url_for('oauth2_signin', oauth_port='douban') }}" class="button button-big external">
+                                        <i class="icon iconfont icon-douban"></i>
+                                        {{ _('douban') }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="list-block-label">
+                            <a href="#">{{ _("Need to create an account ?") }}</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
