@@ -6,9 +6,9 @@
     </div>
 </div>
 <div class="pages navbar-through">
-    <div data-page="about" class="page">
+    <div data-page="create-note" class="page">
         <div class="page-content">
-
+            <form action="{{ url_for('create_note_api') }}" method="POST" class="note-form">
             <div class="content-block-title">{{ _('create a kind') }}</div>
             <div class="list-block">
                 <ul>
@@ -44,10 +44,11 @@
 
             <div class="list-block inset">
                 <ul>
-                    <li><a href="#" class="list-button item-link color-red">Big Red Button</a>
+                    <li><a href="#" class="list-button item-link">{{ _('create_note') }}</a>
                     </li>
                 </ul>
             </div>
+            </form>
         </div>
     </div>
 </div>

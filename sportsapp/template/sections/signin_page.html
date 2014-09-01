@@ -6,7 +6,8 @@
             <div class="page-content login-screen-content">
                 <div class="login-screen-title">SportsApp</div>
                 <!-- Login form -->
-                <form action="{{ url_for('signin') }}" method="POST" class="signin-form">
+                <form action="{{ url_for('signin_api') }}" method="POST" class="signin-form">
+
                     <div class="list-block">
                         <ul>
                             <li class="item-content">
@@ -27,27 +28,36 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="list-block">
+
+                    <div class="list-block inset">
                         <div class="row">
-                            <div class="col-50">
-                                <p><a href="#" type="submit" class="button button-big color-blue button-fill signin-btn">{{ _('signin') }}</a>
-                                </p>
+                            <div class="col-5"></div>
+                            <div class="col-90">
+                                <ul>
+                                    <li>
+                                        <a href="#" class="list-button item-link color-red signin-btn">{{ _('signin') }}</a>
+                                    </li>
+                                </ul>
                             </div>
-                            <div class="col-50">
-                                <p class="buttons-row theme-blue">
-                                    <a href="{{ url_for('oauth2_signin', oauth_port='qq') }}" class="button button-big external">
-                                        <i class="icon iconfont icon-qq"></i>
-                                        {{ _('qq') }}
-                                    </a>
-                                    <a href="{{ url_for('oauth2_signin', oauth_port='douban') }}" class="button button-big external">
-                                        <i class="icon iconfont icon-douban"></i>
-                                        {{ _('douban') }}
-                                    </a>
-                                </p>
-                            </div>
+                            <div class="col-5"></div>
                         </div>
+                    </div>
+
+                    <div class="list-block">
                         <div class="list-block-label">
-                            <a href="#">{{ _("Need to create an account ?") }}</a>
+                            <p>
+                                <a href="{{ url_for('signup') }}">{{ _("signup") }}</a> 
+                                or 
+                                <a href="{{ url_for('oauth2_signin', oauth_port='qq') }}" class="external">
+                                    <i class="icon iconfont icon-qq"></i>
+                                    {{ _('qq') }}
+                                </a> 
+                                <a href="{{ url_for('oauth2_signin', oauth_port='douban') }}" class="=external">
+                                    <i class="icon iconfont icon-douban"></i>
+                                    {{ _('douban') }}
+                                </a>
+
+                            </p>
                         </div>
                     </div>
                 </form>

@@ -14,13 +14,15 @@ Options:
 
 import flask
 import logging
+import error
+import utils
+from uuid import uuid4
 from flask.ext.babel import Babel
 from models import db, User, Note, NoteKind
-from datetime import datetime
-from uuid import uuid4
 from oauth_adapter import OauthAdapter
-from response import AjaxResponse
 from logging.handlers import TimedRotatingFileHandler
+
+DEFAULT_FETCH_COUNT = 5
 
 app = flask.Flask(__name__)
 
@@ -37,11 +39,23 @@ babel = Babel()
 babel.init_app(app)
 print babel.list_translations()
 
+app.json_encoder = utils.MyJsonEncoder
+
 # init logger
 logHandler = TimedRotatingFileHandler(
     app.config['LOGGER_NAME'], when='D')
 logHandler.setLevel(logging.INFO)
 app.logger.addHandler(logHandler)
+
+
+def account_signin(user_id):
+    """ Create token and user_id in session
+    """
+
+    token = uuid4().get_hex()
+    flask.session['user_id'] = user_id
+    flask.session['token'] = token
+    return {'pk': user_id, 'token': token}
 
 
 @babel.localeselector
@@ -56,16 +70,6 @@ def get_locale():
 @app.route('/')
 def index():
     return flask.render_template('index.html')
-
-
-@app.route('/about')
-def about():
-    return flask.render_template('about.html')
-
-
-@app.route('/services')
-def services():
-    return flask.render_template('services.html')
 
 
 @app.route('/account/oauth2/signin/<string:oauth_port>')
@@ -95,56 +99,132 @@ def oauth2_code_callback(oauth_port):
     user.avatar = userinfo['avatar']
     user.oauth_id = userinfo['oauth_id']
     user.oauth_type = userinfo['oauth_type']
-    user.update_at = datetime.now()
     user.save()
-
-    session_token = uuid4().get_hex()
-    flask.session['session-token'] = session_token
+    account_signin(user.pk)
     response = flask.make_response(flask.redirect(flask.url_for('index')))
-    response.set_cookie('session-token', session_token)
     return response
 
 
+@app.route('/accounts/signup')
+def signup():
+    return flask.render_template('signup.html')
+
+
 @app.route('/api/accounts/signin', methods=['POST'])
-def signin():
-    # username = flask.request.form.get('username')
-    # password = flask.request.form.get('password')
-    return flask.jsonify({'status': 0, 'message': 'ok', 'sessionid': '123456'})
+@utils.json_response
+def signin_api():
+    email = flask.request.form.get('email')
+    password = flask.request.form.get('password')
+
+    user = User.fetchone(email=email)
+    if not user:
+        raise error.UserNotExist()
+
+    if user.password != utils.hash_password(password):
+        raise error.UserPasswordError()
+
+    return account_signin(user.pk)
+
+
+@app.route('/api/accounts/signup', methods=['POST'])
+@utils.json_response
+def signup_api():
+    email = flask.request.form.get('email')
+    nickname = flask.request.form.get('nickname')
+    password = flask.request.form.get('password')
+    repeat_password = flask.request.form.get('repeat_password')
+
+    if password != repeat_password:
+        raise error.RepeatPasswordError()
+
+    user = User.fetchone(email=email)
+    if user:
+        raise error.UserEmailRegisted()
+
+    user = User.fetchone(nickname=nickname)
+    if user:
+        raise error.UserNicknameRegisted()
+
+    user = User()
+    user.email = email
+    user.nickname = nickname
+    user.password = utils.hash_password(password)
+    user.save()
+    return account_signin(user.pk)
 
 
 @app.route('/note/<int:pk>')
+@utils.login_required
 def note_detail(pk):
-    context = {
-        'title': 'my exerise',
-        'content': "element in Ajax loaded page, so we don't need here full HTML layout, just the page.",
-        'create_at': '2014-08-28',
-        'pk': pk
-    }
-    return flask.render_template('note_detail.html', **context)
+    note = Note.fetchone(pk=pk)
+    if not note:
+        raise error.NoteNotExist()
+    return flask.render_template('note_detail.html', {'note': note})
 
 
-# to-do make a api for create kind
+@app.route('/api/note/fetch/<int:pk>', methods=['POST'])
+@utils.json_response
+@utils.login_required
+def fetch_notes(pk):
+    count = flask.request.form.get('count', DEFAULT_FETCH_COUNT)
+    notes = Note.fetchmany(
+        count,
+        order=Note.id.desc(),
+        user_id=flask.session['user_id']
+    )
+    notes = notes.filter(Note.id > pk)
+    return notes
 
-@app.route('/note/kind/create')
-def create_note_kind():
-    response = AjaxResponse()
-    try:
-        name = flask.request.args.get('name')
-        note_kind = NoteKind()
-        note_kind.name = name
-        note_kind.save()
-    except Exception, e:
-        response.status = 0
-        response.title = 'err'
-        response.message = e.message
-    return response.make_response()
 
-# to-do make a api for create note
+@app.route('/kind/create')
+def create_kind():
+    return flask.render_template('kind_create.html')
 
 
 @app.route('/note/create/<int:pk>')
 def create_note(pk):
-    pass
+    return flask.render_template('note_create.html')
+
+
+@app.route('/api/kind/create', methods=['POST'])
+@utils.json_response
+@utils.login_required
+def create_kind_api():
+    name = flask.request.form.get('name')
+    note_kind = NoteKind()
+    note_kind.name = name
+    note_kind.user_id = flask.session['user_id']
+    note_kind.save()
+    return {'pk': note_kind.pk}
+
+
+@app.route('/api/note/create', methods=['POST'])
+@utils.json_response
+@utils.login_required
+def create_note_api():
+    kind_id = flask.request.args.get('pk')
+    user_id = int(flask.session['user_id'])
+
+    # Check kind owner
+    NoteKind.checkUser(kind_id, user_id)
+    quantity = flask.request.args.get('quantity')
+    content = flask.request.args.get('content')
+    note = Note()
+    note.kind_id = kind_id
+    note.user_id = user_id
+    note.content = content
+    note.quantity = quantity
+    note.save()
+    return {'pk': note.pk}
+
+
+@app.route('/api/kinds')
+@utils.json_response
+@utils.login_required
+def get_kind():
+    user_id = int(flask.session['user_id'])
+    records = NoteKind.fetchall(user_id=user_id)
+    return {'kinds': records}
 
 
 if __name__ == "__main__":

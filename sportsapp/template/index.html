@@ -14,7 +14,7 @@
 </head>
 
 <body class="page layout-white">
-    {% include 'sections/login_page.html' %}
+    {% include 'sections/signin_page.html' %}
     <!-- Status bar overlay for fullscreen mode-->
     <div class="statusbar-overlay"></div>
     <!-- Panels overlay-->
@@ -31,7 +31,7 @@
         <!-- Bottom Tabbar-->
         {% include 'sections/bottom_tabbar.html' %}
     </div>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/framework7.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/framework7.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/cookies.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/my-app.js') }}"></script>

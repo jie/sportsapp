@@ -1,43 +1,26 @@
 <div id="viewForm" class="view tab">
     <div class="navbar">
         <div class="navbar-inner">
-            <div class="center sliding">{{ _('View Form') }}</div>
-            <div class="right"><a href="{{ url_for('create_note_kind') }}" class="link icon-only"><i class="icon iconfont icon-jia"></i></a>
+            <div class="center sliding">{{ _('Create Note') }}</div>
+            <div class="right"><a href="{{ url_for('create_kind') }}" class="link icon-only"><i class="icon iconfont icon-jia"></i> {{ _('add kind') }}</a>
             </div>
         </div>
     </div>
     <div class="pages navbar-through toolbar-through">
-        <div data-page="notepage" class="page">
-            <div class="page-content">
-                <div class="content-block-title">Links</div>
-                <div class="list-block">
+        <div data-page="note-kind" class="page">
+            <div class="page-content pull-to-refresh-content refresh-kinds">
+
+                <div class="pull-to-refresh-layer">
+                    <div class="preloader"></div>
+                    <div class="pull-to-refresh-arrow"></div>
+                </div>
+
+                <div class="content-block-title">{{ _('select a kind') }}</div>
+                <div class="list-block note-kind">
                     <ul>
-                        <li>
-                            <a href="{{ url_for('create_note', pk=1) }}" class="item-link item-content">
-                                <div class="item-media"><i class="icon icon-f7"></i>
-                                </div>
-                                <div class="item-inner">
-                                    <div class="item-title">Ivan Petrov</div>
-                                    <div class="item-after"></div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('create_note', pk=1) }}" class="item-link item-content">
-                                <div class="item-media"><i class="icon icon-f7"></i>
-                                </div>
-                                <div class="item-inner">
-                                    <div class="item-title">John Doe</div>
-                                    <div class="item-after"></div>
-                                </div>
-                            </a>
-                        </li>
                     </ul>
                 </div>
             </div>
         </div>
-
-
-
     </div>
 </div>

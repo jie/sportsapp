@@ -2,6 +2,8 @@
 # encoding: utf-8
 # @author: ZhouYang
 
+from datetime import datetime
+from error import WrongPermissionError
 from flask.ext.sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
@@ -10,11 +12,18 @@ class ModelBase(object):
     protected = ['pk', 'id']
 
     @classmethod
-    def fetchall(cls, order=None):
+    def fetchall(cls, order=None, **filters):
         query = cls.query
         if order is not None:
             query = query.order_by(order)
-        return query.all()
+        return query.filter_by(**filters).all()
+
+    @classmethod
+    def fetchmany(cls, count, order=None, **filters):
+        query = cls.query
+        if order is not None:
+            query = query.order_by(order)
+        return query.filter_by(**filters).limit(count)
 
     @classmethod
     def fetchone(cls, **filters):
@@ -26,6 +35,8 @@ class ModelBase(object):
         return obj
 
     def save(self, commit=True):
+        if hasattr(self, 'update_at'):
+            self.update_at = datetime.now()
         db.session.add(self)
         if commit:
             self.commit()
@@ -86,7 +97,16 @@ class NoteKind(db.Model, ModelBase):
     create_at = db.Column(db.DateTime, server_default="current_timestamp")
     update_at = db.Column(db.DateTime)
     is_enable = db.Column(db.Boolean, default=True)
-    user = db.relationship('user')
+    user = db.relationship('User')
+
+    @staticmethod
+    def checkUser(cls, pk, user_id):
+        note_kind = cls.fetchone(pk=pk)
+        if note_kind.user_id != int(user_id):
+            raise WrongPermissionError()
+
+    def to_dict(self):
+        return {'pk': self.pk, 'name': self.name, 'create_at': self.create_at}
 
 
 class Note(db.Model, ModelBase):
@@ -101,5 +121,5 @@ class Note(db.Model, ModelBase):
     create_at = db.Column(db.DateTime, server_default="current_timestamp")
     update_at = db.Column(db.DateTime)
     is_enable = db.Column(db.Boolean, default=True)
-    user = db.relationship('user')
-    kind = db.relationship('note_kind')
+    user = db.relationship('User')
+    kind = db.relationship('NoteKind')
