@@ -13,14 +13,12 @@ Options:
 
 
 import flask
-import logging
 import error
 import utils
 from uuid import uuid4
 from flask.ext.babel import Babel
 from models import db, User, Note, NoteKind
 from oauth_adapter import OauthAdapter
-from logging.handlers import TimedRotatingFileHandler
 
 DEFAULT_FETCH_COUNT = 5
 
@@ -32,10 +30,6 @@ app.static_folder = app.config['STATIC_PATH']
 app.template_folder = app.config['TEMPLATE_PATH']
 app.root_path = app.config['BASE_DIR']
 
-# init logger
-logHandler = TimedRotatingFileHandler(app.config['LOGGER_NAME'], when='D')
-logHandler.setLevel(logging.INFO)
-app.logger.addHandler(logHandler)
 
 db.init_app(app)
 
@@ -45,12 +39,6 @@ babel.init_app(app)
 print babel.list_translations()
 
 app.json_encoder = utils.MyJsonEncoder
-
-# init logger
-logHandler = TimedRotatingFileHandler(
-    app.config['LOGGER_NAME'], when='D')
-logHandler.setLevel(logging.INFO)
-app.logger.addHandler(logHandler)
 
 
 def account_signin(user_id):
