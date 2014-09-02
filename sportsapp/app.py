@@ -32,6 +32,11 @@ app.static_folder = app.config['STATIC_PATH']
 app.template_folder = app.config['TEMPLATE_PATH']
 app.root_path = app.config['BASE_DIR']
 
+# init logger
+logHandler = TimedRotatingFileHandler(app.config['LOGGER_NAME'], when='D')
+logHandler.setLevel(logging.INFO)
+app.logger.addHandler(logHandler)
+
 db.init_app(app)
 
 # init babel
