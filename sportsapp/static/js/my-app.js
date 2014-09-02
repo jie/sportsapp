@@ -1,3 +1,13 @@
+// Initialize your app
+var myApp = new Framework7({
+    pushState: true,
+});
+
+
+// Export selectors engine
+var $$ = Dom7;
+
+
 // add string.format method
 String.prototype.format = function(args) {
     var newStr = this;
@@ -7,18 +17,21 @@ String.prototype.format = function(args) {
     return newStr;
 };
 
+Date.prototype.formate_date = function() {
+    var year = this.getFullYear();
+    var date = ("0" + this.getDate()).slice(-2);
+    var month = ("0" + (this.getMonth() + 1)).slice(-2);
+    return "{year}-{month}-{date}".format({
+        year: year,
+        month: month,
+        date: date
+    });
+}
+
 function docSting(f) {
     return f.toString().replace(/^[^\/]+\/\*!?\s?/, '').replace(/\*\/[^\/]+$/, '');
 }
 
-// Initialize your app
-var myApp = new Framework7({
-    pushState: true,
-});
-
-
-// Export selectors engine
-var $$ = Framework7.$;
 
 myApp.urlParams = {
     'GET_KINDS': 'api/kinds',
@@ -52,6 +65,47 @@ var setKinds = function(content) {
             'name': content.kinds[item].name
         }));
     }
+    myApp.pullToRefreshDone();
+}
+
+
+var setNotes = function(content) {
+    var itemNoteHTML = docSting(function() {
+        /*
+    <div class="list-block">
+      <ul>
+        <li class="item-content">
+          <div class="item-inner">
+            <div class="item-title">Item title</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    */
+    });
+    var itemContentHtml = docSting(function() {
+        /*
+        < div class = "content-block-title" >{title}< /div>
+        
+        */
+    });
+
+
+    $$('.notes-list').html('');
+    var previous_date = '';
+    for (var item in content.notes) {
+        if(previous_date!=content.notes[item].create_date){
+            previous_date = content.notes[item].create_date
+            $$('.notes-list').append('<div class="content-block-title" style="text-align:center; margin-bottom:0;">{create_date}</div>'.format({create_date: previous_date}));
+        }
+
+        $$('.notes-list').append('<div class="item-kind content-block">{kind}: {quantity}</div>'.format({'quantity': content.notes[item].quantity, 'kind': content.notes[item].kind['name']}))
+        if(content.notes[item].content){
+            $$('.notes-list').append('<div class="content-block inset item-kind"><div class="content-block-inner">{content}</div></div>'.format({content: content.notes[item].content}));
+        }
+    }
+
+    console.log($$('.notes-list'));
     myApp.pullToRefreshDone();
 }
 
@@ -114,13 +168,11 @@ $('body').delegate('.signup-btn', 'click', function() {
         if (response.status == 0) {
             createCookie('session_token', response.content.token, 30);
             viewHome.loadPage('/');
-        } else {
-            myApp.addNotification({
-                title: response.title,
-                message: response.message
-            });
         }
-
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
     }, 300);
 });
 
@@ -131,12 +183,27 @@ $('body').delegate('.create-kind-btn', 'click', function() {
         var response = JSON.parse(data);
         if (response.status == 0) {
             viewForm.goBack();
-        } else {
-            myApp.addNotification({
-                title: response.title,
-                message: response.message
-            });
         }
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
+    }, 300);
+});
+
+
+$('body').delegate('.create-note-btn', 'click', function() {
+    var formData = myApp.formToJSON('.note-form');
+    $$.post("api/note/create", formData, function(data) {
+        var response = JSON.parse(data);
+        if (response.status == 0) {
+            viewForm.goBack();
+            myApp.showTab('#viewHome');
+        }
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
 
     }, 300);
 });
@@ -154,6 +221,10 @@ myApp.onPageBeforeRemove('note-detail', function(page) {
     $$('.toolbar').removeClass('hidden-toolbar');
 });
 
+myApp.onPageInit('create-note', function(page) {
+    var today = new Date();
+    $('.note-date').attr('value', today.formate_date());
+});
 
 $$('#viewForm').on('show', function() {
     if (myApp.userData.kinds.length == 0) {
@@ -162,16 +233,11 @@ $$('#viewForm').on('show', function() {
 });
 
 
-// myApp.onPageInit('*', function(page) {
-//     signinCheckCookie();
-// });
-
-
 var getByApi = function(url, callback) {
     $$.get(url, function(data) {
         var response = JSON.parse(data);
+        console.log(response);
         if (response.status == 0) {
-
             callback(response.content);
         } else {
             myApp.addNotification({
@@ -206,10 +272,14 @@ var signinCheckCookie = function() {
     }
 };
 
-$('body').delegate('.refresh-kinds', 'refresh', function(e) {
-    console.log('asdasdasdasdasd');
+$$('.refresh-kinds').on('refresh', function(e) {
     getByApi(myApp.urlParams.GET_KINDS, setKinds);
 });
+
+$$('.refresh-notes').on('refresh', function(e) {
+    getByApi(myApp.urlParams.GET_NOTES, setNotes);
+});
+
 
 $(document).ready(function() {
     signinCheckCookie();

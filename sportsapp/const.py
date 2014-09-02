@@ -47,5 +47,15 @@ ResponseStatus = {
     -21: {
         'title': 'note not exist',
         'message': 'request note not found'
+    },
+
+    -22: {
+        'title': 'user kind name exist',
+        'message': 'user has created this kind name'
+    },
+
+    -23: {
+        'title': 'kind not exists',
+        'message': 'kind not exists'
     }
 }

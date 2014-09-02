@@ -86,6 +86,14 @@ class User(db.Model, ModelBase):
     update_at = db.Column(db.DateTime)
     is_enable = db.Column(db.Boolean, default=True)
 
+    def to_dict(self):
+        return {
+            'pk': self.pk,
+            'nickname': self.nickname,
+            'email': self.email,
+            'create_at': self.create_at
+        }
+
 
 class NoteKind(db.Model, ModelBase):
 
@@ -99,14 +107,12 @@ class NoteKind(db.Model, ModelBase):
     is_enable = db.Column(db.Boolean, default=True)
     user = db.relationship('User')
 
-    @staticmethod
-    def checkUser(cls, pk, user_id):
-        note_kind = cls.fetchone(pk=pk)
-        if note_kind.user_id != int(user_id):
-            raise WrongPermissionError()
-
     def to_dict(self):
-        return {'pk': self.pk, 'name': self.name, 'create_at': self.create_at}
+        return {
+            'pk': self.pk,
+            'name': self.name,
+            'create_at': self.create_at
+        }
 
 
 class Note(db.Model, ModelBase):
@@ -123,3 +129,13 @@ class Note(db.Model, ModelBase):
     is_enable = db.Column(db.Boolean, default=True)
     user = db.relationship('User')
     kind = db.relationship('NoteKind')
+
+    def to_dict(self):
+        return {
+            'pk': self.pk,
+            'user': self.user,
+            'kind': self.kind,
+            'quantity': self.quantity,
+            'content': self.content,
+            'create_date': self.create_at.strftime('%Y-%m-%d')
+        }

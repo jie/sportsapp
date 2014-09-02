@@ -159,7 +159,7 @@ def note_detail(pk):
     note = Note.fetchone(pk=pk)
     if not note:
         raise error.NoteNotExist()
-    return flask.render_template('note_detail.html', {'note': note})
+    return flask.render_template('note_detail.html', **{'note': note})
 
 
 @app.route('/api/note/fetch/<int:pk>', methods=['POST'])
@@ -182,8 +182,12 @@ def create_kind():
 
 
 @app.route('/note/create/<int:pk>')
+@utils.login_required
 def create_note(pk):
-    return flask.render_template('note_create.html')
+    note_kind = NoteKind.fetchone(pk=pk, user_id=flask.session['user_id'])
+    if not note_kind:
+        raise error.KindNoteExistError()
+    return flask.render_template('note_create.html', kind=note_kind)
 
 
 @app.route('/api/kind/create', methods=['POST'])
@@ -191,9 +195,14 @@ def create_note(pk):
 @utils.login_required
 def create_kind_api():
     name = flask.request.form.get('name')
+    user_id = flask.session['user_id']
+    note_kind = NoteKind.fetchone(name=name, user_id=user_id)
+    if note_kind:
+        raise error.KindExistError()
+
     note_kind = NoteKind()
     note_kind.name = name
-    note_kind.user_id = flask.session['user_id']
+    note_kind.user_id = user_id
     note_kind.save()
     return {'pk': note_kind.pk}
 
@@ -202,13 +211,16 @@ def create_kind_api():
 @utils.json_response
 @utils.login_required
 def create_note_api():
-    kind_id = flask.request.args.get('pk')
+    kind_id = flask.request.form.get('kind_id')
+    quantity = flask.request.form.get('quantity')
+    content = flask.request.form.get('content')
     user_id = int(flask.session['user_id'])
 
     # Check kind owner
-    NoteKind.checkUser(kind_id, user_id)
-    quantity = flask.request.args.get('quantity')
-    content = flask.request.args.get('content')
+    note_kind = NoteKind.fetchone(pk=kind_id, user_id=user_id)
+    if not note_kind:
+        raise error.KindNoteExistError()
+
     note = Note()
     note.kind_id = kind_id
     note.user_id = user_id
@@ -221,10 +233,19 @@ def create_note_api():
 @app.route('/api/kinds')
 @utils.json_response
 @utils.login_required
-def get_kind():
+def get_kinds():
     user_id = int(flask.session['user_id'])
     records = NoteKind.fetchall(user_id=user_id)
     return {'kinds': records}
+
+
+@app.route('/api/notes')
+@utils.json_response
+@utils.login_required
+def get_notes():
+    user_id = int(flask.session['user_id'])
+    records = Note.fetchall(order=Note.create_at.desc(), user_id=user_id)
+    return {'notes': records}
 
 
 if __name__ == "__main__":

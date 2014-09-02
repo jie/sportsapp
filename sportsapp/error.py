@@ -47,3 +47,11 @@ class UserNicknameRegisted(Error):
 class NoteNotExist(Error):
 
     STATUS_CODE = -21
+
+
+class KindExistError(Error):
+    STATUS_CODE = -22
+
+
+class KindNoteExistError(Error):
+    STATUS_CODE = -23

@@ -83,3 +83,7 @@ i.tabbar-icon {
 .hidden-toolbar {
      z-index: -100
 }
+
+.item-kind {
+    margin: 15px 0;
+}
