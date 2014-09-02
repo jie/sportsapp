@@ -3,7 +3,6 @@
 # @author: ZhouYang
 
 from datetime import datetime
-from error import WrongPermissionError
 from flask.ext.sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 

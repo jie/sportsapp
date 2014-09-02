@@ -36,10 +36,10 @@ def hash_password(password):
 
 class AjaxResponse(object):
 
-    def __init__(self, status=0, title='ok', message='', content=None):
+    def __init__(self, status=0, title='ok', message=None, content=None):
         self.status = status
         self.title = title
-        self.message = message
+        self.message = message if message else ResponseStatus[status]['message']
         self.content = content
 
     def make_response(self):
@@ -77,9 +77,6 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         token = request.cookies.get('session_token')
         if 'token' not in session.keys() or session['token'] != token:
-            response = flask.make_response(
-                flask.redirect(flask.url_for('index')))
-            response.set_cookie('session-token', '', expires=0)
-            return response
+            raise error.LoginRequiredError()
         return f(*args, **kwargs)
     return decorated_function

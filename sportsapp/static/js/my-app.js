@@ -48,8 +48,6 @@ var setKinds = function(content) {
         /*
     <li>
         <a href='{link}' class='item-link item-content'>
-            <div class='item-media'><i class='icon icon-f7'></i>
-            </div>
             <div class='item-inner'>
                 <div class='item-title'>{name}</div>
                 <div class='item-after'></div>
@@ -94,44 +92,27 @@ var setNotes = function(content) {
     $$('.notes-list').html('');
     var previous_date = '';
     for (var item in content.notes) {
-        if(previous_date!=content.notes[item].create_date){
+        if (previous_date != content.notes[item].create_date) {
             previous_date = content.notes[item].create_date
-            $$('.notes-list').append('<div class="content-block-title" style="text-align:center; margin-bottom:0;">{create_date}</div>'.format({create_date: previous_date}));
+            $$('.notes-list').append('<div class="content-block-title item-date" style="text-align:center; margin-bottom:0;">{create_date}</div>'.format({
+                create_date: previous_date
+            }));
         }
 
-        $$('.notes-list').append('<div class="item-kind content-block">{kind}: {quantity}</div>'.format({'quantity': content.notes[item].quantity, 'kind': content.notes[item].kind['name']}))
-        if(content.notes[item].content){
-            $$('.notes-list').append('<div class="content-block inset item-kind"><div class="content-block-inner">{content}</div></div>'.format({content: content.notes[item].content}));
+        $$('.notes-list').append('<div class="item-kind content-block">{kind}: {quantity}</div>'.format({
+            'quantity': content.notes[item].quantity,
+            'kind': content.notes[item].kind['name']
+        }))
+        if (content.notes[item].content) {
+            $$('.notes-list').append('<div class="content-block inset item-kind"><div class="content-block-inner">{content}</div></div>'.format({
+                content: content.notes[item].content
+            }));
         }
     }
 
-    console.log($$('.notes-list'));
     myApp.pullToRefreshDone();
 }
 
-
-myApp.setNotes = function(content) {
-    var itemHTML = docSting(function() {
-        /*
-    <li>
-        <a href='{link}' class='item-link item-content'>
-            <div class='item-media'><i class='icon icon-f7'></i>
-            </div>
-            <div class='item-inner'>
-                <div class='item-title'>{name}</div>
-                <div class='item-after'></div>
-            </div>
-        </a>
-    </li>
-    */
-    });
-    for (var item in content.notes) {
-        $$('.note-kind').find('ul').prepend(itemHTML.format({
-            'link': 'note/create/' + item.pk,
-            'name': item.name
-        }));
-    }
-}
 
 // Add views
 var viewHome = myApp.addView('#viewHome', {
@@ -151,12 +132,13 @@ $$('.signin-btn').on('click', function() {
         if (response.status == 0) {
             myApp.closeModal('.login-screen');
             createCookie('session_token', response.content.token, 30);
-        } else {
-            myApp.addNotification({
-                title: response.title,
-                message: response.message
-            });
+        } else if (response.status == -2) {
+            eraseCookie('session_token');
         }
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
 
     }, 300);
 });
@@ -168,6 +150,8 @@ $('body').delegate('.signup-btn', 'click', function() {
         if (response.status == 0) {
             createCookie('session_token', response.content.token, 30);
             viewHome.loadPage('/');
+        } else if (response.status == -2) {
+            eraseCookie('session_token');
         }
         myApp.addNotification({
             title: response.title,
@@ -183,6 +167,8 @@ $('body').delegate('.create-kind-btn', 'click', function() {
         var response = JSON.parse(data);
         if (response.status == 0) {
             viewForm.goBack();
+        } else if (response.status == -2) {
+            eraseCookie('session_token');
         }
         myApp.addNotification({
             title: response.title,
@@ -199,7 +185,10 @@ $('body').delegate('.create-note-btn', 'click', function() {
         if (response.status == 0) {
             viewForm.goBack();
             myApp.showTab('#viewHome');
+        } else if (response.status == -2) {
+            eraseCookie('session_token');
         }
+
         myApp.addNotification({
             title: response.title,
             message: response.message
@@ -236,15 +225,15 @@ $$('#viewForm').on('show', function() {
 var getByApi = function(url, callback) {
     $$.get(url, function(data) {
         var response = JSON.parse(data);
-        console.log(response);
         if (response.status == 0) {
             callback(response.content);
-        } else {
-            myApp.addNotification({
-                title: response.title,
-                message: response.message
-            });
+        } else if (response.status == -2) {
+            eraseCookie('session_token');
         }
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
 
     }, 300);
 }

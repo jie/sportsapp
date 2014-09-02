@@ -20,7 +20,7 @@ from flask.ext.babel import Babel
 from models import db, User, Note, NoteKind
 from oauth_adapter import OauthAdapter
 
-DEFAULT_FETCH_COUNT = 5
+DEFAULT_FETCH_COUNT = 10
 
 app = flask.Flask(__name__)
 
@@ -155,20 +155,6 @@ def note_detail(pk):
     return flask.render_template('note_detail.html', **{'note': note})
 
 
-@app.route('/api/note/fetch/<int:pk>', methods=['POST'])
-@utils.json_response
-@utils.login_required
-def fetch_notes(pk):
-    count = flask.request.form.get('count', DEFAULT_FETCH_COUNT)
-    notes = Note.fetchmany(
-        count,
-        order=Note.id.desc(),
-        user_id=flask.session['user_id']
-    )
-    notes = notes.filter(Note.id > pk)
-    return notes
-
-
 @app.route('/kind/create')
 def create_kind():
     return flask.render_template('kind_create.html')
@@ -237,7 +223,11 @@ def get_kinds():
 @utils.login_required
 def get_notes():
     user_id = int(flask.session['user_id'])
-    records = Note.fetchall(order=Note.create_at.desc(), user_id=user_id)
+    records = Note.fetchmany(
+        DEFAULT_FETCH_COUNT,
+        order=Note.create_at.desc(),
+        user_id=user_id
+    )
     return {'notes': records}
 
 
