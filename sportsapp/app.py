@@ -16,6 +16,7 @@ import flask
 import error
 import utils
 from uuid import uuid4
+from datetime import datetime, timedelta
 from flask.ext.babel import Babel
 from models import db, User, Note, NoteKind
 from oauth_adapter import OauthAdapter
@@ -223,12 +224,17 @@ def get_kinds():
 @utils.login_required
 def get_notes():
     user_id = int(flask.session['user_id'])
-    records = Note.fetchmany(
-        DEFAULT_FETCH_COUNT,
-        order=Note.create_at.desc(),
-        user_id=user_id
+    # records = Note.fetchall(
+    #     order=Note.create_at.desc(),
+    #     user_id=user_id,
+    # )
+
+    records = Note.query.filter(
+        Note.user_id == user_id,
+        Note.create_at >= datetime.now() - timedelta(days=7)
     )
-    return {'notes': records}
+    records = records.order_by(Note.create_at.desc())
+    return {'notes': records.all()}
 
 
 if __name__ == "__main__":
