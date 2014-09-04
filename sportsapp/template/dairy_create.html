@@ -1,0 +1,44 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="left sliding"><a href="index.html" class="back link"><i class="icon icon-back"></i><span>Back</span></a>
+        </div>
+    </div>
+</div>
+<div class="pages navbar-through">
+    <div data-page="create-dairy" class="page">
+        <div class="page-content">
+            <form action="{{ url_for('create_dairy_api') }}" method="POST" class="dairy-form">
+                <div class="content-block-title">{{ _('create dairy') }}</div>
+                <div class="list-block">
+                    <ul>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-input">
+                                        <input type="text" name="title" class="dairy-title" placeholder="{{ _('title') }}" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-input">
+                                        <textarea name="content" placeholder="{{ _('content') }}"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="list-block inset">
+                    <ul>
+                        <li><a href="#" class="list-button item-link create-dairy-btn">{{ _('create_dairy') }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

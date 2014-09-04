@@ -18,7 +18,7 @@ import utils
 from uuid import uuid4
 from datetime import datetime, timedelta
 from flask.ext.babel import Babel
-from models import db, User, Note, NoteKind
+from models import db, User, Note, NoteKind, Dairy
 from oauth_adapter import OauthAdapter
 
 DEFAULT_FETCH_COUNT = 10
@@ -170,6 +170,26 @@ def create_note(pk):
     return flask.render_template('note_create.html', kind=note_kind)
 
 
+@app.route('/dairy/create')
+def create_dairy():
+    return flask.render_template('dairy_create.html')
+
+
+@app.route('/api/dairy/create', methods=['POST'])
+@utils.json_response
+@utils.login_required
+def create_dairy_api():
+    title = flask.request.form.get('title')
+    content = flask.request.form.get('content')
+    user_id = flask.session['user_id']
+    record = Dairy()
+    record.title = title
+    record.content = content
+    record.user_id = user_id
+    record.save()
+    return {'pk': record.pk}
+
+
 @app.route('/api/kind/create', methods=['POST'])
 @utils.json_response
 @utils.login_required
@@ -224,17 +244,35 @@ def get_kinds():
 @utils.login_required
 def get_notes():
     user_id = int(flask.session['user_id'])
-    # records = Note.fetchall(
-    #     order=Note.create_at.desc(),
-    #     user_id=user_id,
-    # )
-
-    records = Note.query.filter(
+    notes = Note.query.filter(
         Note.user_id == user_id,
-        Note.create_at >= datetime.now() - timedelta(days=7)
+        Note.create_at >= datetime.now() - timedelta(days=7),
+        Note.is_enable == 1
     )
-    records = records.order_by(Note.create_at.desc())
-    return {'notes': records.all()}
+    notes = notes.order_by(Note.create_at.desc())
+    dairies = Dairy.query.filter(
+        Dairy.user_id == user_id,
+        Dairy.create_at >= datetime.now() - timedelta(days=7),
+        Dairy.is_enable == 1
+    )
+    records = notes.all()
+    records.extend(dairies.all())
+    records = sorted(records, key=lambda x: x.create_at, reverse=True)
+    return {'notes': records}
+
+
+@app.route('/api/note/delete', methods=['POST'])
+@utils.json_response
+@utils.login_required
+def delete_note():
+    pk = flask.request.form.get('pk')
+    user_id = int(flask.session['user_id'])
+    note = Note.fetchone(pk=pk, user_id=user_id)
+    if not note:
+        raise error.NoteNotExist()
+    note.is_enable = 0
+    note.save()
+    return {'pk': pk}
 
 
 if __name__ == "__main__":

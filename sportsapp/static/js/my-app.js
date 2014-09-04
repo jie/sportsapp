@@ -68,49 +68,89 @@ var setKinds = function(content) {
 
 
 var setNotes = function(content) {
-    var itemNoteHTML = docSting(function() {
+
+    var itemDateHtml = docSting(function() {
         /*
-    <div class="list-block">
-      <ul>
-        <li class="item-content">
-          <div class="item-inner">
-            <div class="item-title">Item title</div>
-          </div>
-        </li>
-      </ul>
-    </div>
-    */
-    });
-    var itemContentHtml = docSting(function() {
-        /*
-        < div class = "content-block-title" >{title}< /div>
-        
+        <div class="content-block-title item-date" style="margin-bottom:0;">{create_date}</div>
         */
     });
 
+    var itemNoteUlHtml = docSting(function() {
+        /*
+        <div class="list-block">
+            <ul>{note_lis}</ul>
+            <div class="list-block-label"></div>
+        </div>
+        */
+    });
+
+    var itemNoteHTML = docSting(function() {
+        /*
+        <li>
+        <a href="note/{pk}" class="item-link item-content">
+            <div class="item-inner">
+                <div class="item-title">{name}</div>
+                <div class="item-after">{quantity}</div>
+            </div>
+        </a>
+        </li>
+        */
+    });
+    var itemDairyHtml = docSting(function() {
+        /*
+        <div class="content-block item-kind"><div class="content-block-inner">{content}</div></div>
+        */
+    });
 
     $$('.notes-list').html('');
-    var previous_date = '';
+
+    var items_by_date = {};
+    var items_date_arry = [];
     for (var item in content.notes) {
-        if (previous_date != content.notes[item].create_date) {
-            previous_date = content.notes[item].create_date
-            $$('.notes-list').append('<div class="content-block-title item-date" style="text-align:center; margin-bottom:0;">{create_date}</div>'.format({
-                create_date: previous_date
+        if ($.inArray(content.notes[item].create_date, items_date_arry) == -1) {
+            items_date_arry.push(content.notes[item].create_date);
+        }
+    }
+    for (var curdate in items_date_arry) {
+
+        var notes = [];
+        var dairies = [];
+
+        for (var item in content.notes) {
+            if (content.notes[item].create_date == items_date_arry[curdate]) {
+                if (content.notes[item].hasOwnProperty('title')) {
+                    dairies.push(itemDairyHtml.format({
+                        content: content.notes[item].content
+                    }));
+                } else {
+                    notes.push(itemNoteHTML.format({
+                        pk: content.notes[item].pk,
+                        name: content.notes[item].kind.name,
+                        quantity: content.notes[item].quantity
+                    }));
+                }
+            }
+        }
+
+        $('.notes-list').append(itemDateHtml.format({
+            create_date: items_date_arry[curdate]
+        }));
+
+        if (notes.length > 0) {
+            $('.notes-list').append(itemNoteUlHtml.format({
+                note_lis: notes.join('')
             }));
         }
 
-        $$('.notes-list').append('<div class="item-kind content-block">{kind}: {quantity}</div>'.format({
-            'quantity': content.notes[item].quantity,
-            'kind': content.notes[item].kind['name']
-        }))
-        if (content.notes[item].content) {
-            $$('.notes-list').append('<div class="content-block inset item-kind"><div class="content-block-inner">{content}</div></div>'.format({
-                content: content.notes[item].content
-            }));
+        if (dairies.length > 0) {
+            for (var item in dairies) {
+                $('.notes-list').append(dairies[item]);
+            }
         }
     }
 
     myApp.pullToRefreshDone();
+
 }
 
 
@@ -197,6 +237,44 @@ $('body').delegate('.create-note-btn', 'click', function() {
     }, 300);
 });
 
+$('body').delegate('.create-dairy-btn', 'click', function() {
+    var formData = myApp.formToJSON('.dairy-form');
+    $$.post("api/dairy/create", formData, function(data) {
+        var response = JSON.parse(data);
+        if (response.status == 0) {
+            viewForm.goBack();
+        } else if (response.status == -2) {
+            eraseCookie('session_token');
+        }
+
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
+
+    }, 300);
+});
+
+
+
+$('body').delegate('.delete-note-btn', 'click', function() {
+    var formData = {'pk': $$('.note_detail_id').val()};
+    $$.post("api/note/delete", formData, function(data) {
+        var response = JSON.parse(data);
+        if (response.status == 0) {
+            viewHome.goBack();
+        } else if (response.status == -2) {
+            eraseCookie('session_token');
+        }
+
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
+
+    }, 300);
+});
+
 myApp.onPageInit('signup', function(page) {
     myApp.closeModal('.login-screen');
     $$('.toolbar').addClass('hidden-toolbar');
@@ -223,18 +301,20 @@ $$('#viewForm').on('show', function() {
 
 
 var getByApi = function(url, callback) {
+    console.log(url)
     $$.get(url, function(data) {
         var response = JSON.parse(data);
+        console.log(response);
         if (response.status == 0) {
+            console.log(response.content)
             callback(response.content);
         } else if (response.status == -2) {
+            myApp.addNotification({
+                title: response.title,
+                message: response.message
+            });
             eraseCookie('session_token');
         }
-        myApp.addNotification({
-            title: response.title,
-            message: response.message
-        });
-
     }, 300);
 }
 
@@ -243,11 +323,12 @@ var postByApi = function(url, params, callback) {
     $$.post(url, JSON.stringify(params), function(data) {
         if (response.status == 0) {
             callback(response.content);
-        } else {
+        } else if (response.status == -2) {
             myApp.addNotification({
                 title: response.title,
                 message: response.message
             });
+            eraseCookie('session_token');
         }
 
     }, 300);

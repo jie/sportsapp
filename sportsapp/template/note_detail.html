@@ -1,16 +1,43 @@
 <div id="viewNoteDetail" class="view view-main">
     <div class="navbar">
         <div class="navbar-inner">
-            <div class="left"><a href="/" class="back link"><i class="icon icon-back-blue"></i><span>back</span></a>
+            <div class="left">
+                <a href="/" class="back link"><i class="icon icon-back-blue"></i><span>back</span></a>
             </div>
-            <div class="center sliding">{{ title }}</div>
+            <div class="center sliding">{{ note.create_at }}</div>
         </div>
     </div>
     <div class="pages navbar-through">
         <div data-page="note-detail" class="page">
             <div class="page-content">
+                <input type="hidden" class="note_detail_id" value="{{ note.pk }}">
                 <div class="content-block">
-                    {{ content }}
+                    <div class="list-block">
+                        <ul>
+                            <li>
+                                <div class="item-inner">
+                                    <div class="item-title">{{ note.kind.name }}</div>
+                                    <div class="item-after">{{ note.quantity }}</div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="list-block-label"></div>
+                    </div>
+                </div>
+                {% if note.content %}
+                <div class="content-block">
+                    <div class="content-block-inner">{{ note.content }}</div>
+                </div>
+                {% endif %}
+
+                <div class="list-block inset">
+                    <div class="row">
+                        <div class="col-20"></div>
+                        <div class="col-60">
+                            <a href="#" class="button active color-red delete-note-btn">{{ _('delete_note') }}</a>
+                        </div>
+                        <div class="col-20"></div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -138,3 +138,26 @@ class Note(db.Model, ModelBase):
             'content': self.content,
             'create_date': self.create_at.strftime('%Y-%m-%d')
         }
+
+
+class Dairy(db.Model, ModelBase):
+
+    __tablename__ = 'dairy'
+
+    pk = db.Column('id', db.Integer, primary_key=True)
+    title = db.Column(db.String)
+    content = db.Column(db.String)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    update_at = db.Column(db.DateTime)
+    is_enable = db.Column(db.Boolean, default=True)
+    user = db.relationship('User')
+
+    def to_dict(self):
+        return {
+            'pk': self.pk,
+            'user': self.user,
+            'title': self.title,
+            'content': self.content,
+            'create_date': self.create_at.strftime('%Y-%m-%d')
+        }

@@ -5,7 +5,6 @@
 
 import error
 from hashlib import sha1
-import flask
 from flask import jsonify, session, request
 from flask.json import JSONEncoder
 from datetime import datetime
