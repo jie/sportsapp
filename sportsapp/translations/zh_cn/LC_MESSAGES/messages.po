@@ -1,0 +1,111 @@
+# Chinese (Simplified, China) translations for PROJECT.
+# Copyright (C) 2014 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <zhouyang@zhouyang.me>, 2014.
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2014-09-04 19:38+0800\n"
+"PO-Revision-Date: 2014-09-04 19:38+0800\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: zh_Hans_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 1.3\n"
+
+#: template/dairy_create.html:3 template/kind_create.html:3
+#: template/note_create.html:3 template/note_detail.html:5
+#: template/signup.html:3
+msgid "back"
+msgstr "后退"
+
+#: template/dairy_create.html:11 template/dairy_create.html:37
+#: template/views/views_form.html:21
+msgid "create dairy"
+msgstr "创建日志"
+
+#: template/dairy_create.html:18
+msgid "title"
+msgstr "标题"
+
+#: template/dairy_create.html:27 template/note_create.html:28
+msgid "content"
+msgstr "内容"
+
+#: template/kind_create.html:5 template/kind_create.html:12
+#: template/kind_create.html:28
+msgid "create kind"
+msgstr "创建分类"
+
+#: template/kind_create.html:19
+msgid "name"
+msgstr "分类名称"
+
+#: template/note_create.html:12
+#, python-format
+msgid "create %(kind)s note"
+msgstr "创建%(kind)s的记录"
+
+#: template/note_create.html:19
+msgid "quantity"
+msgstr "数量"
+
+#: template/note_create.html:37
+msgid "date"
+msgstr "日期"
+
+#: template/note_create.html:47 template/views/views_form.html:4
+msgid "create note"
+msgstr "创建记录"
+
+#: template/note_detail.html:37
+msgid "delete note"
+msgstr "删除记录"
+
+#: template/signup.html:5 template/signup.html:55
+#: template/sections/signin_page.html:49
+msgid "signup"
+msgstr "注册"
+
+#: template/signup.html:18 template/sections/signin_page.html:15
+#: template/sections/signin_page.html:17
+msgid "email"
+msgstr "邮箱"
+
+#: template/signup.html:27
+msgid "nickname"
+msgstr "昵称"
+
+#: template/signup.html:36 template/sections/signin_page.html:23
+#: template/sections/signin_page.html:25
+msgid "password"
+msgstr "密码"
+
+#: template/signup.html:45
+msgid "repeat password"
+msgstr "重复密码"
+
+#: template/sections/signin_page.html:38
+msgid "signin"
+msgstr "登录"
+
+#: template/sections/signin_page.html:53
+msgid "qq"
+msgstr "QQ"
+
+#: template/sections/signin_page.html:57
+msgid "douban"
+msgstr "豆瓣"
+
+#: template/views/views_form.html:28
+msgid "select kind"
+msgstr "选择分类"
+
+#: template/views/views_home.html:4
+msgid "all notes"
+msgstr "所有记录"
+

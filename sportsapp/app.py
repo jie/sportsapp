@@ -39,6 +39,15 @@ babel = Babel()
 babel.init_app(app)
 print babel.list_translations()
 
+
+@babel.localeselector
+def get_locale():
+    user = getattr(flask.g, 'user', None)
+    if user is not None:
+        return getattr(user, 'locale', 'zh')
+    accept_languages = app.config.get('ACCEPT_LANGUAGES', ['zh'])
+    return flask.request.accept_languages.best_match(accept_languages)
+
 app.json_encoder = utils.MyJsonEncoder
 
 
@@ -50,15 +59,6 @@ def account_signin(user_id):
     flask.session['user_id'] = user_id
     flask.session['token'] = token
     return {'pk': user_id, 'token': token}
-
-
-@babel.localeselector
-def get_locale():
-    user = getattr(flask.g, 'user', None)
-    if user is not None:
-        return getattr(user, 'locale', 'zh')
-    accept_languages = app.config.get('ACCEPT_LANGUAGES', ['zh'])
-    return flask.request.accept_languages.best_match(accept_languages)
 
 
 @app.route('/')
