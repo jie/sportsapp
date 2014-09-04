@@ -258,7 +258,9 @@ $('body').delegate('.create-dairy-btn', 'click', function() {
 
 
 $('body').delegate('.delete-note-btn', 'click', function() {
-    var formData = {'pk': $$('.note_detail_id').val()};
+    var formData = {
+        'pk': $$('.note_detail_id').val()
+    };
     $$.post("api/note/delete", formData, function(data) {
         var response = JSON.parse(data);
         if (response.status == 0) {
@@ -273,6 +275,30 @@ $('body').delegate('.delete-note-btn', 'click', function() {
         });
 
     }, 300);
+});
+
+
+$('body').delegate('.signout-btn', 'click', function() {
+    // $$.get("api/account/signout", function(data) {
+    //     var response = JSON.parse(data);
+    //     if (response.status == 0) {
+    //         eraseCookie('session');
+    //         eraseCookie('session_token');
+    //         window.location = '/'
+    //     } else if (response.status == -2) {
+    //         eraseCookie('session_token');
+    //     }
+
+    //     myApp.addNotification({
+    //         title: response.title,
+    //         message: response.message
+    //     });
+
+    // }, 300);
+    eraseCookie('session');
+    eraseCookie('session_token');
+    window.location = '/'
+
 });
 
 myApp.onPageInit('signup', function(page) {
