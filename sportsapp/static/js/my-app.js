@@ -301,12 +301,9 @@ $$('#viewForm').on('show', function() {
 
 
 var getByApi = function(url, callback) {
-    console.log(url)
     $$.get(url, function(data) {
         var response = JSON.parse(data);
-        console.log(response);
         if (response.status == 0) {
-            console.log(response.content)
             callback(response.content);
         } else if (response.status == -2) {
             myApp.addNotification({
