@@ -1,6 +1,6 @@
 <div class="navbar">
     <div class="navbar-inner">
-        <div class="left sliding"><a href="{{ url_for('index') }}" class="external link"><i class="icon icon-back"></i><span>Back</span></a>
+        <div class="left sliding"><a href="{{ url_for('index') }}" class="external link"><i class="icon icon-back"></i><span>{{ _('back') }}</span></a>
         </div>
         <div class="center sliding">{{ _('signup') }}</div>
     </div>
@@ -9,7 +9,6 @@
     <div data-page="signup" class="page">
         <div class="page-content">
             <form action="{{ url_for('signup_api') }}" method="POST" class="signup-form">
-                <div class="content-block-title">Full Layout</div>
                 <div class="list-block">
                     <ul>
                         <li>
