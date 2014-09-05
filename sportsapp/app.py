@@ -44,8 +44,8 @@ print babel.list_translations()
 def get_locale():
     user = getattr(flask.g, 'user', None)
     if user is not None:
-        return getattr(user, 'locale', 'zh')
-    accept_languages = app.config.get('ACCEPT_LANGUAGES', ['zh'])
+        return getattr(user, 'locale', 'zh_Hans_CN')
+    accept_languages = app.config.get('ACCEPT_LANGUAGES', ['zh_Hans_CN'])
     return flask.request.accept_languages.best_match(accept_languages)
 
 app.json_encoder = utils.MyJsonEncoder
