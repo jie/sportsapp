@@ -60,7 +60,13 @@ ResponseStatus = {
     }
 }
 
-UserStatus = {
-    0: 'ok',
-    -1: 'need create nickname'
-}
+import collections
+
+
+UserStatus = collections.namedtuple('UserStatus', 'OK UNREGISTED')
+
+# Signin from oauth2, but not regist
+UserStatus.UNREGISTED = 0
+
+# Normal
+UserStatus.OK = 1

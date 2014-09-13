@@ -92,7 +92,9 @@ class User(db.Model, ModelBase):
             'pk': self.pk,
             'nickname': self.nickname,
             'email': self.email,
-            'create_at': self.create_at
+            'create_at': self.create_at,
+            'status': self.status,
+            'avatar': self.avatar
         }
 
 

@@ -36,11 +36,21 @@ function docSting(f) {
 myApp.urlParams = {
     'GET_KINDS': 'api/kinds',
     'GET_NOTES': 'api/notes',
+    'GET_USERINFO': 'api/user/info'
 }
 
 myApp.userData = {
     'notes': [],
-    'kinds': []
+    'kinds': [],
+    'userinfo': null
+}
+
+
+var setUserinfo = function(content) {
+    if(content.status == 1) {
+        myApp.userData = content
+    }
+    myApp.showTab('#viewMore');
 }
 
 var setKinds = function(content) {
@@ -346,6 +356,8 @@ var signinCheckCookie = function() {
     myApp.session_token = readCookie('session_token');
     if (!myApp.session_token) {
         myApp.loginScreen();
+    } else {
+        getByApi(myApp.urlParams.GET_USERINFO, setUserinfo);
     }
 };
 

@@ -122,31 +122,31 @@ def signin_api():
     return account_signin(user.pk)
 
 
-@app.route('/api/accounts/signup', methods=['POST'])
-@utils.json_response
-def signup_api():
-    email = flask.request.form.get('email')
-    nickname = flask.request.form.get('nickname')
-    password = flask.request.form.get('password')
-    repeat_password = flask.request.form.get('repeat_password')
+# @app.route('/api/accounts/signup', methods=['POST'])
+# @utils.json_response
+# def signup_api():
+#     email = flask.request.form.get('email')
+#     nickname = flask.request.form.get('nickname')
+#     password = flask.request.form.get('password')
+#     repeat_password = flask.request.form.get('repeat_password')
 
-    if password != repeat_password:
-        raise error.RepeatPasswordError()
+#     if password != repeat_password:
+#         raise error.RepeatPasswordError()
 
-    user = User.fetchone(email=email)
-    if user:
-        raise error.UserEmailRegisted()
+#     user = User.fetchone(email=email)
+#     if user:
+#         raise error.UserEmailRegisted()
 
-    user = User.fetchone(nickname=nickname)
-    if user:
-        raise error.UserNicknameRegisted()
+#     user = User.fetchone(nickname=nickname)
+#     if user:
+#         raise error.UserNicknameRegisted()
 
-    user = User()
-    user.email = email
-    user.nickname = nickname
-    user.password = utils.hash_password(password)
-    user.save()
-    return account_signin(user.pk)
+#     user = User()
+#     user.email = email
+#     user.nickname = nickname
+#     user.password = utils.hash_password(password)
+#     user.save()
+#     return account_signin(user.pk)
 
 
 @app.route('/note/<int:pk>')
@@ -175,6 +175,15 @@ def create_note(pk):
 @app.route('/dairy/create')
 def create_dairy():
     return flask.render_template('dairy_create.html')
+
+
+@app.route('/api/user/info', methods=['GET'])
+@utils.json_response
+# @utils.login_required
+def get_userinfo_api():
+    user_id = flask.session['user_id']
+    userinfo = User.fetchone(pk=user_id)
+    return userinfo
 
 
 @app.route('/api/dairy/create', methods=['POST'])
