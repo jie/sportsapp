@@ -78,12 +78,14 @@ class User(db.Model, ModelBase):
     pk = db.Column('id', db.Integer, primary_key=True)
     nickname = db.Column(db.String(36), unique=True)
     email = db.Column(db.String(32))
+    avatar = db.Column(db.String(128))
     password = db.Column(db.String(40))
     oauth_id = db.Column(db.String(40))
     oauth_type = db.Column(db.String(12))
     create_at = db.Column(db.DateTime, server_default="current_timestamp")
     update_at = db.Column(db.DateTime)
     is_enable = db.Column(db.Boolean, default=True)
+    status = db.Column(db.Integer, default=0)
 
     def to_dict(self):
         return {
@@ -138,6 +140,9 @@ class Note(db.Model, ModelBase):
             'content': self.content,
             'create_date': self.create_at.strftime('%Y-%m-%d')
         }
+
+    def avatar_url(self):
+        return self.avatar
 
 
 class Dairy(db.Model, ModelBase):

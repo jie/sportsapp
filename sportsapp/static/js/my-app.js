@@ -46,15 +46,15 @@ myApp.userData = {
 var setKinds = function(content) {
     var itemHTML = docSting(function() {
         /*
-    <li>
-        <a href='{link}' class='item-link item-content'>
-            <div class='item-inner'>
-                <div class='item-title'>{name}</div>
-                <div class='item-after'></div>
-            </div>
-        </a>
-    </li>
-    */
+        <li>
+            <a href='{link}' class='item-link item-content'>
+                <div class='item-inner'>
+                    <div class='item-title'>{name}</div>
+                    <div class='item-after'></div>
+                </div>
+            </a>
+        </li>
+        */
     });
     $$('.note-kind').find('ul').html('');
     for (var item in content.kinds) {
@@ -86,19 +86,19 @@ var setNotes = function(content) {
 
     var itemNoteHTML = docSting(function() {
         /*
-        <li>
-        <a href="note/{pk}" class="item-link item-content">
-            <div class="item-inner">
-                <div class="item-title">{name}</div>
-                <div class="item-after">{quantity}</div>
-            </div>
-        </a>
-        </li>
+            <li>
+            <a href="note/{pk}" class="item-link item-content">
+                <div class="item-inner">
+                    <div class="item-title">{name}</div>
+                    <div class="item-after">{quantity}</div>
+                </div>
+            </a>
+            </li>
         */
     });
     var itemDairyHtml = docSting(function() {
         /*
-        <div class="content-block item-kind"><div class="content-block-inner">{content}</div></div>
+            <div class="content-block item-kind"><div class="content-block-inner">{content}</div></div>
         */
     });
 
@@ -279,22 +279,6 @@ $('body').delegate('.delete-note-btn', 'click', function() {
 
 
 $('body').delegate('.signout-btn', 'click', function() {
-    // $$.get("api/account/signout", function(data) {
-    //     var response = JSON.parse(data);
-    //     if (response.status == 0) {
-    //         eraseCookie('session');
-    //         eraseCookie('session_token');
-    //         window.location = '/'
-    //     } else if (response.status == -2) {
-    //         eraseCookie('session_token');
-    //     }
-
-    //     myApp.addNotification({
-    //         title: response.title,
-    //         message: response.message
-    //     });
-
-    // }, 300);
     eraseCookie('session');
     eraseCookie('session_token');
     window.location = '/'

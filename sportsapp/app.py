@@ -80,7 +80,6 @@ def oauth2_code_callback(oauth_port):
         oauth_port, flask.current_app.config['OAUTH2_CONFIG'])
     oauth_adapter.client.get_access_token(code)
     userinfo = oauth_adapter.client.get_userinfo()
-
     user = User.fetchone(
         oauth_id=userinfo['oauth_id'],
         oauth_type=userinfo['oauth_type']
@@ -88,14 +87,17 @@ def oauth2_code_callback(oauth_port):
 
     if not user:
         user = User()
+        user.oauth_id = userinfo['oauth_id']
+        user.oauth_type = userinfo['oauth_type']
 
     user.nickname = userinfo['nickname']
     user.avatar = userinfo['avatar']
     user.oauth_id = userinfo['oauth_id']
     user.oauth_type = userinfo['oauth_type']
     user.save()
-    account_signin(user.pk)
+    session_token = account_signin(user.pk)
     response = flask.make_response(flask.redirect(flask.url_for('index')))
+    response.set_cookie('session_token', session_token['token'])
     return response
 
 

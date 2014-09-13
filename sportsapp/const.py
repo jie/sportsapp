@@ -59,3 +59,8 @@ ResponseStatus = {
         'message': 'kind not exists'
     }
 }
+
+UserStatus = {
+    0: 'ok',
+    -1: 'need create nickname'
+}
