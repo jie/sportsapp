@@ -36,7 +36,7 @@ function docSting(f) {
 myApp.urlParams = {
     'GET_KINDS': 'api/kinds',
     'GET_NOTES': 'api/notes',
-    'GET_USERINFO': 'api/user/info'
+    'GET_USERINFO': 'api/accounts/userinfo'
 }
 
 myApp.userData = {
@@ -48,9 +48,11 @@ myApp.userData = {
 
 var setUserinfo = function(content) {
     if(content.status == 1) {
-        myApp.userData = content
+        myApp.userData.userinfo = content
+    } else if (content.status == 0) {
+        console.log(content);
+        myApp.showTab('#viewMore');
     }
-    myApp.showTab('#viewMore');
 }
 
 var setKinds = function(content) {
@@ -73,7 +75,6 @@ var setKinds = function(content) {
             'name': content.kinds[item].name
         }));
     }
-    myApp.pullToRefreshDone();
 }
 
 
@@ -158,9 +159,6 @@ var setNotes = function(content) {
             }
         }
     }
-
-    myApp.pullToRefreshDone();
-
 }
 
 
@@ -185,6 +183,7 @@ $$('.signin-btn').on('click', function() {
         } else if (response.status == -2) {
             eraseCookie('session_token');
         }
+
         myApp.addNotification({
             title: response.title,
             message: response.message
@@ -234,7 +233,6 @@ $('body').delegate('.create-note-btn', 'click', function() {
         var response = JSON.parse(data);
         if (response.status == 0) {
             viewForm.goBack();
-            myApp.showTab('#viewHome');
         } else if (response.status == -2) {
             eraseCookie('session_token');
         }
@@ -288,6 +286,24 @@ $('body').delegate('.delete-note-btn', 'click', function() {
 });
 
 
+
+$('body').delegate('.userinfo-btn', 'click', function() {
+    var formData = myApp.formToJSON('.userinfo-form');
+    console.log(formData)
+    $$.post("api/accounts/userinfo", formData, function(data) {
+        var response = JSON.parse(data);
+        if (response.status == -2) {
+            eraseCookie('session_token');
+        }
+
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
+
+    }, 300);
+});
+
 $('body').delegate('.signout-btn', 'click', function() {
     eraseCookie('session');
     eraseCookie('session_token');
@@ -319,6 +335,19 @@ $$('#viewForm').on('show', function() {
     }
 });
 
+$$('#viewMore').on('show', function() {
+    getByApi(myApp.urlParams.GET_USERINFO, setUserinfo);
+    if(myApp.userData.userinfo) {
+        var userinfo = myApp.userData.userinfo
+        if(userinfo.nickname){
+            $('.userinfo-form input[name=nickname]').val(userinfo.nickname);
+        }
+        if(userinfo.email){
+            $('.userinfo-form input[name=email]').val(userinfo.email);
+        }
+    }
+});
+
 
 var getByApi = function(url, callback) {
     $$.get(url, function(data) {
@@ -331,6 +360,12 @@ var getByApi = function(url, callback) {
                 message: response.message
             });
             eraseCookie('session_token');
+        } else if (response.status == -16) {
+            myApp.addNotification({
+                title: response.title,
+                message: response.message
+            });
+            myApp.showTab('#viewMore');
         }
     }, 300);
 }
@@ -346,6 +381,12 @@ var postByApi = function(url, params, callback) {
                 message: response.message
             });
             eraseCookie('session_token');
+        } else if (response.status == -16) {
+            myApp.addNotification({
+                title: response.title,
+                message: response.message
+            });
+            myApp.showTab('#viewMore');
         }
 
     }, 300);
@@ -363,10 +404,12 @@ var signinCheckCookie = function() {
 
 $$('.refresh-kinds').on('refresh', function(e) {
     getByApi(myApp.urlParams.GET_KINDS, setKinds);
+    myApp.pullToRefreshDone();
 });
 
 $$('.refresh-notes').on('refresh', function(e) {
     getByApi(myApp.urlParams.GET_NOTES, setNotes);
+    myApp.pullToRefreshDone();
 });
 
 

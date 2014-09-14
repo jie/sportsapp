@@ -47,6 +47,11 @@ class UserNicknameRegisted(Error):
     STATUS_CODE = -15
 
 
+class UserStatusError(Error):
+
+    STATUS_CODE = -16
+
+
 class NoteNotExist(Error):
 
     STATUS_CODE = -21

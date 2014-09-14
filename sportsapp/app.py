@@ -5,21 +5,25 @@
 
 """
 Usage:
-    app.py [--port=<port>]
+    app.py [--port=<SERVER_PORT>] [--mock]
 
 Options:
-    --port=<port>         default server port [default: 5000]
+    --port=<SERVER_PORT>        server port                 [default: 5000]
+    --mock                      use mock mode for oauth2    [default: False]
 """
 
 
 import flask
 import error
 import utils
+import const
 from uuid import uuid4
 from datetime import datetime, timedelta
 from flask.ext.babel import Babel
 from models import db, User, Note, NoteKind, Dairy
 from oauth_adapter import OauthAdapter
+
+MOCK_MODE = False
 
 DEFAULT_FETCH_COUNT = 10
 
@@ -51,14 +55,15 @@ def get_locale():
 app.json_encoder = utils.MyJsonEncoder
 
 
-def account_signin(user_id):
+def account_signin(user_dict):
     """ Create token and user_id in session
     """
 
     token = uuid4().get_hex()
-    flask.session['user_id'] = user_id
+    flask.session['user_id'] = user_dict['pk']
     flask.session['token'] = token
-    return {'pk': user_id, 'token': token}
+    flask.session['userinfo'] = user_dict
+    return {'pk': user_dict['pk'], 'token': token, 'userinfo': user_dict}
 
 
 @app.route('/')
@@ -69,7 +74,10 @@ def index():
 @app.route('/account/oauth2/signin/<string:oauth_port>')
 def oauth2_signin(oauth_port):
     oauth_adapter = OauthAdapter(
-        oauth_port, flask.current_app.config['OAUTH2_CONFIG'])
+        oauth_port,
+        flask.current_app.config['OAUTH2_CONFIG'],
+        mock=MOCK_MODE
+    )
     return flask.redirect(oauth_adapter.client.get_authrize_url())
 
 
@@ -77,25 +85,28 @@ def oauth2_signin(oauth_port):
 def oauth2_code_callback(oauth_port):
     code = flask.request.args.get('code')
     oauth_adapter = OauthAdapter(
-        oauth_port, flask.current_app.config['OAUTH2_CONFIG'])
+        oauth_port,
+        flask.current_app.config['OAUTH2_CONFIG'],
+        mock=MOCK_MODE
+    )
     oauth_adapter.client.get_access_token(code)
     userinfo = oauth_adapter.client.get_userinfo()
     user = User.fetchone(
-        oauth_id=userinfo['oauth_id'],
-        oauth_type=userinfo['oauth_type']
+        oauth_id=userinfo.oauth_id,
+        oauth_type=userinfo.oauth_type
     )
 
     if not user:
         user = User()
-        user.oauth_id = userinfo['oauth_id']
-        user.oauth_type = userinfo['oauth_type']
+        user.oauth_id = userinfo.oauth_id
+        user.oauth_type = userinfo.oauth_type
 
-    user.nickname = userinfo['nickname']
-    user.avatar = userinfo['avatar']
-    user.oauth_id = userinfo['oauth_id']
-    user.oauth_type = userinfo['oauth_type']
+    user.nickname = userinfo.nickname
+    user.avatar = userinfo.avatar
+    user.oauth_id = userinfo.oauth_id
+    user.oauth_type = userinfo.oauth_type
     user.save()
-    session_token = account_signin(user.pk)
+    session_token = account_signin(user.to_dict())
     response = flask.make_response(flask.redirect(flask.url_for('index')))
     response.set_cookie('session_token', session_token['token'])
     return response
@@ -119,38 +130,40 @@ def signin_api():
     if user.password != utils.hash_password(password):
         raise error.UserPasswordError()
 
-    return account_signin(user.pk)
+    return account_signin(user.to_dict())
 
 
-# @app.route('/api/accounts/signup', methods=['POST'])
-# @utils.json_response
-# def signup_api():
-#     email = flask.request.form.get('email')
-#     nickname = flask.request.form.get('nickname')
-#     password = flask.request.form.get('password')
-#     repeat_password = flask.request.form.get('repeat_password')
+@app.route('/api/accounts/userinfo', methods=['POST', 'GET'])
+@utils.json_response
+@utils.login_required
+def userinfo():
+    user_id = flask.session['user_id']
+    user = User.fetchone(pk=user_id)
+    if flask.request.method == 'POST':
+        nickname = flask.request.form.get('nickname')
+        email = flask.request.form.get('email')
+        password = flask.request.form.get('password')
+        password_repeat = flask.request.form.get('password_repeat')
 
-#     if password != repeat_password:
-#         raise error.RepeatPasswordError()
-
-#     user = User.fetchone(email=email)
-#     if user:
-#         raise error.UserEmailRegisted()
-
-#     user = User.fetchone(nickname=nickname)
-#     if user:
-#         raise error.UserNicknameRegisted()
-
-#     user = User()
-#     user.email = email
-#     user.nickname = nickname
-#     user.password = utils.hash_password(password)
-#     user.save()
-#     return account_signin(user.pk)
+        result = User.checkUserinfo(user_id, nickname, email, password)
+        if result and user.nickname == nickname:
+            raise error.UserNicknameRegisted()
+        elif result and user.email == email:
+            raise error.UserEmailRegisted()
+        else:
+            user.nickname = nickname
+            user.email = email
+            user.status = const.UserStatus.OK
+            if password == password_repeat:
+                user.set_password(password)
+        user.save()
+    user_dict = user.to_dict()
+    flask.session['userinfo'] = user_dict
+    return user_dict
 
 
 @app.route('/note/<int:pk>')
-@utils.login_required
+@utils.status_required
 def note_detail(pk):
     note = Note.fetchone(pk=pk)
     if not note:
@@ -164,7 +177,7 @@ def create_kind():
 
 
 @app.route('/note/create/<int:pk>')
-@utils.login_required
+@utils.status_required
 def create_note(pk):
     note_kind = NoteKind.fetchone(pk=pk, user_id=flask.session['user_id'])
     if not note_kind:
@@ -177,18 +190,9 @@ def create_dairy():
     return flask.render_template('dairy_create.html')
 
 
-@app.route('/api/user/info', methods=['GET'])
-@utils.json_response
-# @utils.login_required
-def get_userinfo_api():
-    user_id = flask.session['user_id']
-    userinfo = User.fetchone(pk=user_id)
-    return userinfo
-
-
 @app.route('/api/dairy/create', methods=['POST'])
 @utils.json_response
-@utils.login_required
+@utils.status_required
 def create_dairy_api():
     title = flask.request.form.get('title')
     content = flask.request.form.get('content')
@@ -203,7 +207,7 @@ def create_dairy_api():
 
 @app.route('/api/kind/create', methods=['POST'])
 @utils.json_response
-@utils.login_required
+@utils.status_required
 def create_kind_api():
     name = flask.request.form.get('name')
     user_id = flask.session['user_id']
@@ -220,7 +224,7 @@ def create_kind_api():
 
 @app.route('/api/note/create', methods=['POST'])
 @utils.json_response
-@utils.login_required
+@utils.status_required
 def create_note_api():
     kind_id = flask.request.form.get('kind_id')
     quantity = flask.request.form.get('quantity')
@@ -243,7 +247,7 @@ def create_note_api():
 
 @app.route('/api/kinds')
 @utils.json_response
-@utils.login_required
+@utils.status_required
 def get_kinds():
     user_id = int(flask.session['user_id'])
     records = NoteKind.fetchall(user_id=user_id)
@@ -252,7 +256,7 @@ def get_kinds():
 
 @app.route('/api/notes')
 @utils.json_response
-@utils.login_required
+@utils.status_required
 def get_notes():
     user_id = int(flask.session['user_id'])
     notes = Note.query.filter(
@@ -274,7 +278,7 @@ def get_notes():
 
 @app.route('/api/note/delete', methods=['POST'])
 @utils.json_response
-@utils.login_required
+@utils.status_required
 def delete_note():
     pk = flask.request.form.get('pk')
     user_id = int(flask.session['user_id'])
@@ -289,4 +293,5 @@ def delete_note():
 if __name__ == "__main__":
     from docopt import docopt
     ARGS = docopt(__doc__, version='0.0.1')
+    MOCK_MODE = ARGS['--mock']
     app.run("0.0.0.0", port=int(ARGS['--port']), debug=True)

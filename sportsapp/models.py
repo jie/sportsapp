@@ -2,6 +2,8 @@
 # encoding: utf-8
 # @author: ZhouYang
 
+import sqlalchemy
+from hashlib import sha1
 from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
@@ -96,6 +98,17 @@ class User(db.Model, ModelBase):
             'status': self.status,
             'avatar': self.avatar
         }
+
+    def set_password(self, password):
+        self.password = sha1(password).hexdigest()
+
+    @classmethod
+    def checkUserinfo(cls, pk, email, nickname, password):
+        user = cls.query.filter(
+            cls.pk != pk,
+            sqlalchemy.or_(cls.nickname == nickname, cls.email == email),
+        ).first()
+        return True if user else False
 
 
 class NoteKind(db.Model, ModelBase):

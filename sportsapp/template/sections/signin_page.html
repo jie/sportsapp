@@ -46,12 +46,11 @@
                     <div class="list-block">
                         <div class="list-block-label">
                             <p>
-                                <a href="{{ url_for('signup') }}">{{ _("signup") }}</a> 
-                                or 
                                 <a href="{{ url_for('oauth2_signin', oauth_port='qq') }}" class="external">
                                     <i class="icon iconfont icon-qq"></i>
                                     {{ _('qq') }}
                                 </a> 
+                                &nbsp&nbsp&nbsp
                                 <a href="{{ url_for('oauth2_signin', oauth_port='douban') }}" class="=external">
                                     <i class="icon iconfont icon-douban"></i>
                                     {{ _('douban') }}

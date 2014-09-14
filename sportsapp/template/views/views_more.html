@@ -2,8 +2,57 @@
     <div class="pages">
         <div data-page="index-3" class="page">
             <div class="page-content">
-                <div class="content-block-title"></div>
+
+                <form action="" method="POST" class="userinfo-form">
+                    <div class="list-block">
+                        <ul>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-input">
+                                            <input type="text" name="nickname" placeholder="{{ _('nickname') }}" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-input">
+                                            <input type="text" name="email" placeholder="{{ _('email') }}" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-input">
+                                            <input type="password" name="password" placeholder="{{ _('password') }}" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-input">
+                                            <input type="password" name="password_repeat" placeholder="{{ _('password') }}" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+
                 <div class="content-block">
+                    <div class="list-block inset">
+                        <ul>
+                            <li><a href="#" class="list-button item-link color-green userinfo-btn">{{ _('submit') }}</a>
+                            </li>
+                        </ul>
+                    </div>
                     <div class="list-block inset">
                         <ul>
                             <li><a href="#" class="list-button item-link color-red signout-btn">{{ _('signout') }}</a>

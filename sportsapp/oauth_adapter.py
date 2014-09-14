@@ -51,11 +51,28 @@ Using exist client:
 
 import random
 import requests
+from collections import namedtuple
 from urllib import urlencode
 from urlparse import parse_qs
 
 
+class ClsMeta(type):
+
+    CLIENTS_MAP = {}
+
+    def __new__(mcs, name, base, dct):
+        cls = type.__new__(mcs, name, base, dct)
+        if hasattr(cls, 'client_name'):
+            mcs.CLIENTS_MAP[cls.client_name] = cls
+        return cls
+
+
 class AbstractOauthClient(object):
+
+    __metaclass__ = ClsMeta
+
+    UserInfo = namedtuple(
+        "UserInfo", "nickname oauth_id, oauth_type, avatar, homepage")
 
     def __init__(self, oauth_config):
         self.oauth_config = oauth_config
@@ -99,6 +116,8 @@ class AbstractOauthClient(object):
 
 class QQOauthClient(AbstractOauthClient):
 
+    client_name = "QQOauthClient"
+
     def get_authrize_url(self):
         payload = {
             'response_type': 'code',
@@ -129,11 +148,13 @@ class QQOauthClient(AbstractOauthClient):
         response = self.get_resource(
             self.oauth_config['api']['userinfo'], payload)
         res = response.json()
-        userinfo = {}
-        userinfo['nickname'] = res['nickname']
-        userinfo['oauth_id'] = self.openid
-        userinfo['oauth_type'] = self.oauth_config['name']
-        userinfo['avatar'] = res.get('figureurl_2') or res.get('figureurl_qq_2')
+        userinfo = self.UserInfo(
+            nickname=res['nickname'],
+            oauth_id=self.openid,
+            oauth_type=self.oauth_config['name'],
+            avatar=res.get('figureurl_2') or res.get('figureurl_qq_2'),
+            homepage=None
+        )
         return userinfo
 
     def parse_access_token(self, response):
@@ -142,12 +163,15 @@ class QQOauthClient(AbstractOauthClient):
         self.get_openid()
 
     def get_openid(self):
-        response = requests.get(self.openid_url, params=dict(access_token=self.access_token))
+        response = requests.get(
+            self.openid_url, params=dict(access_token=self.access_token))
         res_map = parse_qs(response.text, keep_blank_values=False)
         self.openid = res_map['openid'][0]
 
 
 class GithubOauthClient(AbstractOauthClient):
+
+    client_name = "GithubOauthClient"
 
     def get_authrize_url(self):
         payload = {
@@ -177,13 +201,13 @@ class GithubOauthClient(AbstractOauthClient):
         response = self.get_resource(
             self.oauth_config['api']['userinfo'], payload)
         res = response.json()
-        userinfo = {}
-        userinfo['nickname'] = res['login']
-        userinfo['oauth_id'] = res['id']
-        userinfo['oauth_type'] = self.oauth_config['name']
-        userinfo['email'] = res['email']
-        userinfo['homepage'] = res['blog'] or res['home_url']
-        userinfo['avatar'] = res['avatar_url']
+        userinfo = self.UserInfo(
+            nickname=res['login'],
+            oauth_id=res['id'],
+            oauth_type=self.oauth_config['name'],
+            homepage=res['blog'] or res['home_url'],
+            avatar=res['avatar_url']
+        )
         return userinfo
 
     def parse_access_token(self, response):
@@ -192,6 +216,8 @@ class GithubOauthClient(AbstractOauthClient):
 
 
 class DoubanOauthClient(AbstractOauthClient):
+
+    client_name = "DoubanOauthClient"
 
     def get_authrize_url(self):
         payload = {
@@ -222,12 +248,13 @@ class DoubanOauthClient(AbstractOauthClient):
                 access_token=self.access_token)}
         )
         res = response.json()
-        userinfo = {}
-        userinfo['nickname'] = res['name']
-        userinfo['oauth_id'] = self.openid
-        userinfo['oauth_type'] = self.oauth_config['name']
-        userinfo['avatar'] = res['large_avatar']
-        userinfo['homepage'] = res['alt']
+        userinfo = self.UserInfo(
+            nickname=res['name'],
+            oauth_id=self.openid,
+            oauth_type=self.oauth_config['name'],
+            avatar=res['large_avatar'],
+            homepage=res['alt']
+        )
         return userinfo
 
     def parse_access_token(self, response):
@@ -237,6 +264,8 @@ class DoubanOauthClient(AbstractOauthClient):
 
 
 class WeiboOauthClient(AbstractOauthClient):
+
+    client_name = "WeiboOauthClient"
 
     def get_authrize_url(self):
         payload = {
@@ -269,12 +298,13 @@ class WeiboOauthClient(AbstractOauthClient):
             params=payload,
         )
         res = response.json()
-        userinfo = {}
-        userinfo['nickname'] = res['screen_name']
-        userinfo['oauth_id'] = self.openid
-        userinfo['oauth_type'] = self.oauth_config['name']
-        userinfo['avatar'] = res['profile_image_url']
-        userinfo['homepage'] = res['url']
+        userinfo = self.UserInfo(
+            nickname=res['screen_name'],
+            oauth_id=self.openid,
+            oauth_type=self.oauth_config['name'],
+            avatar=res['profile_image_url'],
+            homepage=res['url']
+        )
         return userinfo
 
     def parse_access_token(self, response):
@@ -283,25 +313,43 @@ class WeiboOauthClient(AbstractOauthClient):
         self.openid = res['uid']
 
 
+class MockOauthClient(object):
+
+    """
+        Used for mock oauth response
+    """
+
+    UserInfo = AbstractOauthClient.UserInfo
+
+    def get_userinfo(self):
+        from uuid import uuid4
+        userinfo = self.UserInfo(
+            nickname="mock_zhouyang",
+            oauth_id=uuid4().get_hex(),
+            oauth_type='mock',
+            avatar='mock_url',
+            homepage='mock_homepage'
+        )
+        return userinfo
+
+    def get_access_token(self, code):
+        pass
+
+    def get_authrize_url(self):
+        return "http://sportsapp.zhouyang.me/account/oauth2/callback/qq"
+
+
 class OauthAdapter(object):
 
-    OAUTH2_CLIENTS_MAP = {
-        'GithubOauthClient': GithubOauthClient,
-        'QQOauthClient': QQOauthClient,
-        'DoubanOauthClient': DoubanOauthClient,
-        'WeiboOauthClient': WeiboOauthClient
-    }
-
-    @staticmethod
-    def LoadOauth2Clients(cls, **kwargs):
-        cls.OAUTH2_CLIENTS_MAP.update(**kwargs)
-
-    def __init__(self, oauth_port, oauth_config, is_mock=True):
+    def __init__(self, oauth_port, oauth_config, mock=True):
         self.oauth_port = oauth_port
         self.oauth_config = oauth_config
-        self.is_mock = is_mock
+        self.mock = mock
         self.get_oauth_client()
 
     def get_oauth_client(self):
-        client_kw = self.oauth_config[self.oauth_port]
-        self.client = self.OAUTH2_CLIENTS_MAP[client_kw['client']](client_kw)
+        if self.mock:
+            self.client = MockOauthClient()
+        else:
+            client_kw = self.oauth_config[self.oauth_port]
+            self.client = ClsMeta.CLIENTS_MAP[client_kw['client']](client_kw)

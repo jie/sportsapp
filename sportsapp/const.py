@@ -44,6 +44,11 @@ ResponseStatus = {
         'message': 'user nickname has registed'
     },
 
+    -16: {
+        'title': 'user status error',
+        'message': 'user status error'
+    },
+
     -21: {
         'title': 'note not exist',
         'message': 'request note not found'

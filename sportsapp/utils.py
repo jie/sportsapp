@@ -4,6 +4,7 @@
 
 
 import error
+import const
 from hashlib import sha1
 from flask import jsonify, session, request
 from flask.json import JSONEncoder
@@ -38,7 +39,8 @@ class AjaxResponse(object):
     def __init__(self, status=0, title='ok', message=None, content=None):
         self.status = status
         self.title = title
-        self.message = message if message else ResponseStatus[status]['message']
+        self.message = message if message else ResponseStatus[
+            status]['message']
         self.content = content
 
     def make_response(self):
@@ -71,7 +73,26 @@ def json_response(func):
     return decorator
 
 
+def status_required(f):
+    """
+        Check user token in session
+        Check user status
+    """
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get('session_token')
+        if 'token' not in session.keys() or session['token'] != token:
+            raise error.LoginRequiredError()
+
+        if session['userinfo']['status'] != const.UserStatus.OK:
+            raise error.UserStatusError()
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 def login_required(f):
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.cookies.get('session_token')
