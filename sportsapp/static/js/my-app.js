@@ -75,6 +75,7 @@ var setKinds = function(content) {
             'name': content.kinds[item].name
         }));
     }
+    myApp.pullToRefreshDone();
 }
 
 
@@ -159,6 +160,8 @@ var setNotes = function(content) {
             }
         }
     }
+
+    myApp.pullToRefreshDone();
 }
 
 
@@ -404,12 +407,10 @@ var signinCheckCookie = function() {
 
 $$('.refresh-kinds').on('refresh', function(e) {
     getByApi(myApp.urlParams.GET_KINDS, setKinds);
-    myApp.pullToRefreshDone();
 });
 
 $$('.refresh-notes').on('refresh', function(e) {
     getByApi(myApp.urlParams.GET_NOTES, setNotes);
-    myApp.pullToRefreshDone();
 });
 
 
