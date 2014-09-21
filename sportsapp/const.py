@@ -62,6 +62,11 @@ ResponseStatus = {
     -23: {
         'title': 'kind not exists',
         'message': 'kind not exists'
+    },
+
+    -30: {
+        'title': 'plan not found',
+        'message': 'plan not found'
     }
 }
 

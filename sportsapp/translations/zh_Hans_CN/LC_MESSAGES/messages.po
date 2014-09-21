@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-09-04 19:38+0800\n"
+"POT-Creation-Date: 2014-09-21 20:40+0800\n"
 "PO-Revision-Date: 2014-09-05 10:12+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: zh_Hans_CN <LL@li.org>\n"
@@ -19,25 +19,28 @@ msgstr ""
 
 #: template/dairy_create.html:3 template/kind_create.html:3
 #: template/note_create.html:3 template/note_detail.html:5
+#: template/plan_create.html:3 template/plan_item.html:3
+#: template/plan_set_item.html:3 template/plan_set_quantity.html:3
 #: template/signup.html:3
 msgid "back"
 msgstr "返回"
 
 #: template/dairy_create.html:11 template/dairy_create.html:37
-#: template/views/views_form.html:21
+#: template/views/views_form.html:23
 msgid "create dairy"
 msgstr "创建日志"
 
-#: template/dairy_create.html:18
+#: template/dairy_create.html:18 template/plan_create.html:18
 msgid "title"
 msgstr "标题"
 
 #: template/dairy_create.html:27 template/note_create.html:28
+#: template/plan_create.html:27
 msgid "content"
 msgstr "说明"
 
 #: template/kind_create.html:5 template/kind_create.html:12
-#: template/kind_create.html:28
+#: template/kind_create.html:28 template/views/views_form.html:31
 msgid "create kind"
 msgstr "创建分类"
 
@@ -50,7 +53,7 @@ msgstr "名称"
 msgid "create %(kind)s note"
 msgstr "创建%(kind)s记录"
 
-#: template/note_create.html:19
+#: template/note_create.html:19 template/plan_set_quantity.html:19
 msgid "quantity"
 msgstr "数量"
 
@@ -58,7 +61,7 @@ msgstr "数量"
 msgid "date"
 msgstr "日期"
 
-#: template/note_create.html:47 template/views/views_form.html:4
+#: template/note_create.html:46
 msgid "create note"
 msgstr "创建日志"
 
@@ -66,22 +69,40 @@ msgstr "创建日志"
 msgid "delete note"
 msgstr "删除日志"
 
+#: template/plan_create.html:11 template/plan_create.html:36
+#: template/views/views_form.html:15
+msgid "create plan"
+msgstr "创建计划"
+
+#: template/plan_item.html:28
+msgid "finish plan"
+msgstr "完成训练计划"
+
+#: template/plan_item.html:34 template/plan_set_quantity.html:30
+msgid "create plan item"
+msgstr "创建训练计划项目"
+
+#: template/plan_set_quantity.html:12
+#, python-format
+msgid "set %(kind_name)s quantity"
+msgstr "设置%(kind_name)s的数量"
+
 #: template/signup.html:5 template/signup.html:55
-#: template/sections/signin_page.html:49
 msgid "signup"
 msgstr "注册"
 
 #: template/signup.html:18 template/sections/signin_page.html:15
-#: template/sections/signin_page.html:17
+#: template/sections/signin_page.html:17 template/views/views_more.html:22
 msgid "email"
 msgstr "邮箱"
 
-#: template/signup.html:27
+#: template/signup.html:27 template/views/views_more.html:13
 msgid "nickname"
 msgstr "昵称"
 
 #: template/signup.html:36 template/sections/signin_page.html:23
-#: template/sections/signin_page.html:25
+#: template/sections/signin_page.html:25 template/views/views_more.html:31
+#: template/views/views_more.html:40
 msgid "password"
 msgstr "密码"
 
@@ -93,19 +114,31 @@ msgstr "重复密码"
 msgid "signin"
 msgstr "登陆"
 
-#: template/sections/signin_page.html:53
+#: template/sections/signin_page.html:51
 msgid "qq"
 msgstr "QQ"
 
-#: template/sections/signin_page.html:57
+#: template/sections/signin_page.html:56
 msgid "douban"
 msgstr "豆瓣"
 
-#: template/views/views_form.html:28
-msgid "select kind"
-msgstr "选取分类"
+#: template/views/views_form.html:4
+msgid "training plan"
+msgstr "训练计划"
+
+#: template/views/views_form.html:38
+msgid "select plan"
+msgstr "选取计划"
 
 #: template/views/views_home.html:4
 msgid "all notes"
 msgstr "所有日志"
+
+#: template/views/views_more.html:52
+msgid "submit"
+msgstr "提交"
+
+#: template/views/views_more.html:58
+msgid "signout"
+msgstr "注册"
 

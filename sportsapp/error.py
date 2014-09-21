@@ -61,5 +61,9 @@ class KindExistError(Error):
     STATUS_CODE = -22
 
 
-class KindNoteExistError(Error):
+class KindNotExistError(Error):
     STATUS_CODE = -23
+
+
+class PlanNoteFound(Error):
+    STATUS_CODE = -30

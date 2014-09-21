@@ -1,22 +1,21 @@
 <div class="navbar">
     <div class="navbar-inner">
-        <div class="left sliding"><a href="index.html" class="back link"><i class="icon icon-back"></i><span>{{ _('back') }}</span></a>
+        <div class="left sliding"><a href="#" class="back link"><i class="icon icon-back"></i><span>{{ _('back') }}</span></a>
         </div>
     </div>
 </div>
 <div class="pages navbar-through">
-    <div data-page="create-note" class="page">
+    <div data-page="create-plan" class="page">
         <div class="page-content">
-            <form action="{{ url_for('create_note_api') }}" method="POST" class="note-form">
-                <input type="hidden" name="kind_id" value="{{ kind.pk }}">
-                <div class="content-block-title">{{ _('create %(kind)s note', kind=kind.name) }}</div>
+            <form action="{{ url_for('create_plan_api') }}" method="POST" class="plan-form">
+                <div class="content-block-title">{{ _('create plan') }}</div>
                 <div class="list-block">
                     <ul>
                         <li>
                             <div class="item-content">
                                 <div class="item-inner">
                                     <div class="item-input">
-                                        <input type="text" name="quantity" placeholder="{{ _('quantity') }}" />
+                                        <input type="text" name="title" class="plan-title" placeholder="{{ _('title') }}" />
                                     </div>
                                 </div>
                             </div>
@@ -30,20 +29,11 @@
                                 </div>
                             </div>
                         </li>
-                        <li>
-                            <div class="item-content">
-                                <div class="item-inner">
-                                    <div class="item-input">
-                                        <input type="date" name="date" class="note-date" placeholder="{{ _('date') }}" />
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
                     </ul>
                 </div>
                 <div class="list-block inset">
                     <ul>
-                        <li><a href="#" class="list-button item-link create-note-btn">{{ _('create note') }}</a>
+                        <li><a href="#" class="list-button item-link create-plan-btn">{{ _('create plan') }}</a>
                         </li>
                     </ul>
                 </div>

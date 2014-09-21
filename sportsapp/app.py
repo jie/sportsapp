@@ -20,7 +20,7 @@ import const
 from uuid import uuid4
 from datetime import datetime, timedelta
 from flask.ext.babel import Babel
-from models import db, User, Note, NoteKind, Dairy
+from models import db, User, Note, NoteKind, Dairy, Plan, PlanItem, PlanLog
 from oauth_adapter import OauthAdapter
 
 MOCK_MODE = False
@@ -68,7 +68,8 @@ def account_signin(user_dict):
 
 @app.route('/')
 def index():
-    return flask.render_template('index.html')
+    user = User.fetchone(pk=flask.session['user_id'], is_enable=1)
+    return flask.render_template('index.html', user=user)
 
 
 @app.route('/account/oauth2/signin/<string:oauth_port>')
@@ -181,8 +182,141 @@ def create_kind():
 def create_note(pk):
     note_kind = NoteKind.fetchone(pk=pk, user_id=flask.session['user_id'])
     if not note_kind:
-        raise error.KindNoteExistError()
+        raise error.KindNotExistError()
     return flask.render_template('note_create.html', kind=note_kind)
+
+
+@app.route('/plan/create')
+@utils.status_required
+def create_plan():
+    return flask.render_template('plan_create.html')
+
+
+@app.route('/plan/item/detail/<int:pk>')
+@utils.status_required
+def plan_item(pk):
+    user_id = flask.session['user_id']
+    plan = Plan.fetchone(pk=pk, user_id=user_id, is_enable=1)
+    return flask.render_template('plan_item.html', plan=plan)
+
+
+@app.route('/plan/item/set/<int:pk>')
+@utils.status_required
+def set_plan_item(pk):
+    user_id = flask.session['user_id']
+    plan = Plan.fetchone(pk=pk, user_id=user_id, is_enable=1)
+    if not plan:
+        raise error.PlanNoteFound()
+    kinds = NoteKind.fetchall(user_id=user_id, is_enable=1, order=NoteKind.create_at.desc())
+    return flask.render_template('plan_set_item.html', plan=plan, kinds=kinds)
+
+
+@app.route('/plan/item/set_quantity/<int:plan_id>/<int:kind_id>')
+@utils.status_required
+def set_plan_item_quantity(plan_id, kind_id):
+    user_id = flask.session['user_id']
+    plan = Plan.fetchone(pk=plan_id, user_id=user_id, is_enable=1)
+    if not plan:
+        raise error.PlanNoteFound()
+
+    kind = NoteKind.fetchone(pk=kind_id, user_id=user_id, is_enable=1)
+    if not kind:
+        raise error.KindNotExistError()
+    return flask.render_template('plan_set_quantity.html', plan=plan, kind=kind)
+
+
+@app.route('/api/plan/create', methods=['POST'])
+@utils.json_response
+@utils.status_required
+def create_plan_api():
+    title = flask.request.form.get('title')
+    content = flask.request.form.get('content')
+    user_id = flask.session['user_id']
+    record = Plan()
+    record.title = title
+    record.content = content
+    record.user_id = user_id
+    record.create_at = datetime.now()
+    record.update_at = datetime.now()
+    record.is_enable = 1
+    record.save()
+    return {'pk': record.pk}
+
+
+@app.route('/api/plan/finish', methods=['POST'])
+@utils.json_response
+@utils.status_required
+def finish_plan_api():
+    pk = flask.request.form.get('pk')
+    user_id = flask.session['user_id']
+    plan = Plan.fetchone(pk=pk)
+    if not plan:
+        raise error.PlanNoteFound()
+
+    plan_log = PlanLog()
+    plan_log.user_id = user_id
+    plan_log.plan_id = plan.pk
+    plan_log.create_at = datetime.now()
+    plan_log.update_at = datetime.now()
+    plan_log.is_enable = 1
+    plan_log.save(commit=False)
+
+    for item in plan.plan_items:
+        note = Note()
+        note.kind_id = item.kind.pk
+        note.user_id = user_id
+        note.quantity = item.quantity
+        note.plan_log_id = plan_log.pk
+        note.create_at = datetime.now()
+        note.update_at = datetime.now()
+        note.save()
+
+    return {'pk': pk}
+
+
+@app.route('/api/plan/item/create', methods=['POST'])
+@utils.json_response
+@utils.status_required
+def create_plan_item_api():
+    plan_id = flask.request.form.get('plan_id')
+    kind_id = flask.request.form.get('kind_id')
+    quantity = flask.request.form.get('quantity')
+    user_id = flask.session['user_id']
+    plan = Plan.fetchone(pk=plan_id)
+
+    if not plan:
+        raise error.PlanNoteFound()
+
+    item = PlanItem()
+    item.kind_id = kind_id
+    item.user_id = user_id
+    item.plan_id = plan_id
+    item.quantity = quantity
+    item.create_at = datetime.now()
+    item.update_at = datetime.now()
+    item.is_enable = 1
+    item.save()
+    return {'pk': item.pk}
+
+
+@app.route('/api/plan/item/remove', methods=['POST'])
+@utils.json_response
+@utils.status_required
+def remove_plan_item_api():
+    pk = flask.request.form.get('pk')
+    user_id = flask.session['user_id']
+
+    plan = Plan.fetchone(pk=pk, user_id=user_id)
+    if not plan:
+        raise error.PlanNoteFound()
+
+    item = PlanItem.fetchone(pk=pk)
+    if not item:
+        raise error.PlanItemNoteFound()
+
+    item.is_enable = 0
+    item.save()
+    return {'pk': item.pk}
 
 
 @app.route('/dairy/create')
@@ -234,7 +368,7 @@ def create_note_api():
     # Check kind owner
     note_kind = NoteKind.fetchone(pk=kind_id, user_id=user_id)
     if not note_kind:
-        raise error.KindNoteExistError()
+        raise error.KindNotExistError()
 
     note = Note()
     note.kind_id = kind_id
@@ -274,6 +408,15 @@ def get_notes():
     records.extend(dairies.all())
     records = sorted(records, key=lambda x: x.create_at, reverse=True)
     return {'notes': records}
+
+
+@app.route('/api/plans')
+@utils.json_response
+@utils.status_required
+def get_plans():
+    user_id = int(flask.session['user_id'])
+    records = Plan.fetchall(user_id=user_id, order=Plan.create_at.desc())
+    return {'plans': records}
 
 
 @app.route('/api/note/delete', methods=['POST'])

@@ -1,0 +1,27 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="left"><a href="#" class="back link"><i class="icon icon-back"></i><span>{{ _('back') }}</span></a>
+        </div>
+    </div>
+</div>
+<div class="pages navbar-through">
+    <div data-page="plan-set-items" class="page">
+        <input type="hidden" name="plan_id" class="plan_id" value="{{ plan.pk }}">
+        <div class="page-content">
+            <div class="list-block">
+                <ul>
+                    {% for kind in kinds %}
+                    <li>
+                        <a href="{{ url_for('set_plan_item_quantity', plan_id=plan.pk, kind_id=kind.pk) }}" class='item-link item-content'>
+                            <div class='item-inner'>
+                                <div class='item-title'>{{ kind.name }}</div>
+                                <div class='item-after'></div>
+                            </div>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

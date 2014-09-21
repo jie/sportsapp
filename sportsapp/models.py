@@ -84,7 +84,7 @@ class User(db.Model, ModelBase):
     password = db.Column(db.String(40))
     oauth_id = db.Column(db.String(40))
     oauth_type = db.Column(db.String(12))
-    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    create_at = db.Column(db.DateTime, default="current_timestamp")
     update_at = db.Column(db.DateTime)
     is_enable = db.Column(db.Boolean, default=True)
     status = db.Column(db.Integer, default=0)
@@ -116,9 +116,9 @@ class NoteKind(db.Model, ModelBase):
     __tablename__ = 'note_kind'
 
     pk = db.Column('id', db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String(64))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    create_at = db.Column(db.DateTime, default="current_timestamp")
     update_at = db.Column(db.DateTime)
     is_enable = db.Column(db.Boolean, default=True)
     user = db.relationship('User')
@@ -139,8 +139,8 @@ class Note(db.Model, ModelBase):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     kind_id = db.Column(db.Integer, db.ForeignKey('note_kind.id'))
     quantity = db.Column(db.Integer)
-    content = db.Column(db.String)
-    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    content = db.Column(db.String(512))
+    create_at = db.Column(db.DateTime, default="current_timestamp")
     update_at = db.Column(db.DateTime)
     is_enable = db.Column(db.Boolean, default=True)
     user = db.relationship('User')
@@ -165,10 +165,10 @@ class Dairy(db.Model, ModelBase):
     __tablename__ = 'dairy'
 
     pk = db.Column('id', db.Integer, primary_key=True)
-    title = db.Column(db.String)
-    content = db.Column(db.String)
+    title = db.Column(db.String(64))
+    content = db.Column(db.String(512))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    create_at = db.Column(db.DateTime, default="current_timestamp")
     update_at = db.Column(db.DateTime)
     is_enable = db.Column(db.Boolean, default=True)
     user = db.relationship('User')
@@ -181,3 +181,53 @@ class Dairy(db.Model, ModelBase):
             'content': self.content,
             'create_date': self.create_at.strftime('%Y-%m-%d')
         }
+
+
+class Plan(db.Model, ModelBase):
+
+    __tablename__ = 'plan'
+
+    pk = db.Column('id', db.Integer, primary_key=True)
+    title = db.Column(db.String(64), nullable=False)
+    content = db.Column(db.String(512))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    update_at = db.Column(db.DateTime)
+    is_enable = db.Column(db.Boolean, server_default='1')
+    user = db.relationship('User', backref=db.backref('plans', lazy='dynamic'))
+
+    def to_dict(self):
+        return {
+            'pk': self.pk,
+            'user': self.user,
+            'title': self.title,
+            'content': self.content,
+            'create_date': self.create_at.strftime('%Y-%m-%d')
+        }
+
+
+class PlanItem(db.Model, ModelBase):
+
+    __tablename__ = 'plan_item'
+    pk = db.Column('id', db.Integer, primary_key=True)
+    plan_id = db.Column(db.Integer, db.ForeignKey('plan.id'), nullable=False)
+    kind_id = db.Column(db.Integer, db.ForeignKey('note_kind.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    update_at = db.Column(db.DateTime)
+    is_enable = db.Column(db.Boolean, server_default='1')
+    plan = db.relationship('Plan', backref=db.backref('plan_items', lazy='dynamic'))
+    kind = db.relationship('NoteKind')
+
+
+class PlanLog(db.Model, ModelBase):
+
+    __tablename__ = 'plan_log'
+    pk = db.Column('id', db.Integer, primary_key=True)
+    plan_id = db.Column(db.Integer, db.ForeignKey('plan.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    create_at = db.Column(db.DateTime, server_default="current_timestamp")
+    update_at = db.Column(db.DateTime)
+    is_enable = db.Column(db.Boolean, server_default='1')
+    plan = db.relationship('Plan')
+    user = db.relationship('User')

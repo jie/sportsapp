@@ -36,21 +36,22 @@ function docSting(f) {
 myApp.urlParams = {
     'GET_KINDS': 'api/kinds',
     'GET_NOTES': 'api/notes',
+    'GET_PLANS': 'api/plans',
     'GET_USERINFO': 'api/accounts/userinfo'
 }
 
 myApp.userData = {
     'notes': [],
     'kinds': [],
+    'plans': [],
     'userinfo': null
 }
 
 
 var setUserinfo = function(content) {
-    if(content.status == 1) {
+    if (content.status == 1) {
         myApp.userData.userinfo = content
     } else if (content.status == 0) {
-        console.log(content);
         myApp.showTab('#viewMore');
     }
 }
@@ -68,16 +69,41 @@ var setKinds = function(content) {
         </li>
         */
     });
-    $$('.note-kind').find('ul').html('');
+    $$('.plan-kinds').find('ul').html('');
+    var plan_id = $$('.plan_id').val();
     for (var item in content.kinds) {
-        $$('.note-kind').find('ul').prepend(itemHTML.format({
-            'link': 'note/create/' + content.kinds[item].pk,
+        $$('.plan-kinds').find('ul').prepend(itemHTML.format({
+            'link': '/plan/item/set_quantity/' + plan_id + '/' + content.kinds[item].pk,
             'name': content.kinds[item].name
         }));
     }
     myApp.pullToRefreshDone();
 }
 
+
+var setPlans = function(content) {
+    var itemHTML = docSting(function() {
+        /*
+        <li>
+            <a href='{link}' class='item-link item-content' data-reload="true" data-ignoreCache="true">
+                <div class='item-inner'>
+                    <div class='item-title'>{name}</div>
+                    <div class='item-after'></div>
+                </div>
+            </a>
+        </li>
+        */
+    });
+    $$('.plans-of-mine').find('ul').html('');
+    myApp.userData.plans = content.plans;
+    for (var item in myApp.userData.plans) {
+        $$('.plans-of-mine').find('ul').prepend(itemHTML.format({
+            'link': 'plan/item/detail/' + myApp.userData.plans[item].pk,
+            'name': myApp.userData.plans[item].title
+        }));
+    }
+    myApp.pullToRefreshDone();
+}
 
 var setNotes = function(content) {
 
@@ -292,7 +318,6 @@ $('body').delegate('.delete-note-btn', 'click', function() {
 
 $('body').delegate('.userinfo-btn', 'click', function() {
     var formData = myApp.formToJSON('.userinfo-form');
-    console.log(formData)
     $$.post("api/accounts/userinfo", formData, function(data) {
         var response = JSON.parse(data);
         if (response.status == -2) {
@@ -306,6 +331,64 @@ $('body').delegate('.userinfo-btn', 'click', function() {
 
     }, 300);
 });
+
+$('body').delegate('.finish-plan-btn', 'click', function() {
+
+    var formData = {
+        'pk': $$('.plan_id').val()
+    };
+
+    $$.post("api/plan/finish", formData, function(data) {
+        var response = JSON.parse(data);
+        if (response.status == -2) {
+            eraseCookie('session_token');
+        }
+
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
+
+    }, 300);
+
+});
+
+$('body').delegate('.create-plan-item-btn', 'click', function() {
+    var formData = myApp.formToJSON('.plan-quantity-form');
+    $$.post("/api/plan/item/create", formData, function(data) {
+        var response = JSON.parse(data);
+
+        if (response.status == -2) {
+            eraseCookie('session_token');
+        }
+
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
+    }, 300);
+});
+
+$('body').delegate('.create-plan-btn', 'click', function() {
+    var formData = myApp.formToJSON('.plan-form');
+    $$.post("/api/plan/create", formData, function(data) {
+        var response = JSON.parse(data);
+
+        if (response.status == 0) {
+            viewForm.goBack();
+        }
+
+        if (response.status == -2) {
+            eraseCookie('session_token');
+        }
+
+        myApp.addNotification({
+            title: response.title,
+            message: response.message
+        });
+    }, 300);
+});
+
 
 $('body').delegate('.signout-btn', 'click', function() {
     eraseCookie('session');
@@ -332,20 +415,25 @@ myApp.onPageInit('create-note', function(page) {
     $('.note-date').attr('value', today.formate_date());
 });
 
+// myApp.onPageInit('plan-set-items', function(page) {
+//     getByApi(myApp.urlParams.GET_KINDS, setKinds);
+// });
+
+
 $$('#viewForm').on('show', function() {
     if (myApp.userData.kinds.length == 0) {
-        getByApi(myApp.urlParams.GET_KINDS, setKinds);
+        getByApi(myApp.urlParams.GET_PLANS, setPlans);
     }
 });
 
 $$('#viewMore').on('show', function() {
     getByApi(myApp.urlParams.GET_USERINFO, setUserinfo);
-    if(myApp.userData.userinfo) {
+    if (myApp.userData.userinfo) {
         var userinfo = myApp.userData.userinfo
-        if(userinfo.nickname){
+        if (userinfo.nickname) {
             $('.userinfo-form input[name=nickname]').val(userinfo.nickname);
         }
-        if(userinfo.email){
+        if (userinfo.email) {
             $('.userinfo-form input[name=email]').val(userinfo.email);
         }
     }
@@ -405,12 +493,13 @@ var signinCheckCookie = function() {
     }
 };
 
-$$('.refresh-kinds').on('refresh', function(e) {
-    getByApi(myApp.urlParams.GET_KINDS, setKinds);
-});
-
 $$('.refresh-notes').on('refresh', function(e) {
     getByApi(myApp.urlParams.GET_NOTES, setNotes);
+});
+
+$$('.refresh-plans').on('refresh', function(e) {
+    console.log('asdasdasd');
+    getByApi(myApp.urlParams.GET_PLANS, setPlans);
 });
 
 

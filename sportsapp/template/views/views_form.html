@@ -1,20 +1,22 @@
 <div id="viewForm" class="view tab">
     <div class="navbar">
         <div class="navbar-inner">
-            <div class="center sliding">{{ _('create note') }}</div>
-            <div class="right"><a href="{{ url_for('create_kind') }}" class="link icon-only"><i class="icon iconfont icon-jia"></i></a>
-            </div>
+            <div class="center sliding">{{ _('training plan') }}</div>
         </div>
     </div>
     <div class="pages navbar-through toolbar-through">
-        <div data-page="note-kind" class="page">
-            <div class="page-content pull-to-refresh-content refresh-kinds">
-                <div class="pull-to-refresh-layer">
-                    <div class="preloader"></div>
-                    <div class="pull-to-refresh-arrow"></div>
-                </div>
+        <div data-page="select-plan" class="page">
+            <div class="page-content">
                 <div class="list-block">
                     <ul>
+                        <li>
+                            <a href="{{ url_for('create_plan') }}" class='item-link item-content'>
+                                <div class='item-inner'>
+                                    <div class='item-title'>{{ _('create plan') }}</div>
+                                    <div class='item-after'></div>
+                                </div>
+                            </a>
+                        </li>
                         <li>
                             <a href="{{ url_for('create_dairy') }}" class='item-link item-content'>
                                 <div class='item-inner'>
@@ -23,11 +25,31 @@
                                 </div>
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ url_for('create_kind') }}" class='item-link item-content'>
+                                <div class='item-inner'>
+                                    <div class='item-title'>{{ _('create kind') }}</div>
+                                    <div class='item-after'></div>
+                                </div>
+                            </a>
+                        </li>
                     </ul>
                 </div>
-                <div class="content-block-title">{{ _('select kind') }}</div>
-                <div class="list-block note-kind">
+                <div class="content-block-title">{{ _('select plan') }}</div>
+                <div class="list-block plans-of-mine">
                     <ul>
+                        {% if user %}
+                            {% for plan in user.plans %}
+                            <li>
+                                <a href="{{ url_for('plan_item', pk=plan.pk) }}" class='item-link item-content'>
+                                    <div class='item-inner'>
+                                        <div class='item-title'>{{ plan.title }}</div>
+                                        <div class='item-after'></div>
+                                    </div>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        {% endif %}
                     </ul>
                 </div>
             </div>

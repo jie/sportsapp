@@ -1,0 +1,38 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="left sliding"><a href="#" class="back link"><i class="icon icon-back"></i><span>{{ _('back') }}</span></a>
+        </div>
+    </div>
+</div>
+<div class="pages navbar-through">
+    <div data-page="plan-create-item" class="page">
+        <div class="page-content">
+            <div class="list-block">
+                <form action="{{ url_for('create_plan_item_api') }}" method="POST" class="plan-quantity-form">
+                    <div class="content-block-title">{{ _('set %(kind_name)s quantity', kind_name=kind.name) }}</div>
+                    <div class="list-block">
+                        <ul>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-input">
+                                            <input type="text" name="quantity" placeholder="{{ _('quantity') }}" />
+                                            <input type="hidden" type="text" name="kind_id" value="{{ kind.pk }}" />
+                                            <input type="hidden" type="text" name="plan_id" value="{{ plan.pk }}" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="list-block inset">
+                        <ul>
+                            <li><a href="#" class="list-button item-link color-red create-plan-item-btn">{{ _('create plan item') }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

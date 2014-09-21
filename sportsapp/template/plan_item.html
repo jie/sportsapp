@@ -1,0 +1,40 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="left sliding"><a href="#" class="back link"><i class="icon icon-back"></i><span>{{ _('back') }}</span></a>
+        </div>
+    </div>
+</div>
+<div class="pages navbar-through">
+    <div data-page="plan-items" class="page">
+        <input type="hidden" name="plan_id" class="plan_id" value="{{ plan.pk }}">
+        <div class="page-content">
+            <div class="content-block-title">{{ plan.title }}</div>
+            <div class="list-block" class="plan-kinds">
+                <ul>
+                    {% for item in plan.plan_items %}
+                    <li>
+                        <a class='item-link item-content'>
+                            <div class='item-inner'>
+                                <div class='item-title'>{{ item.kind.name }}</div>
+                                <div class='item-after'>{{ item.quantity }}</div>
+                            </div>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="list-block inset">
+                <ul>
+                    <li><a href="#" class="list-button item-link finish-plan-btn">{{ _('finish plan') }}</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="list-block inset">
+                <ul>
+                    <li><a href="{{ url_for('set_plan_item', pk=plan.pk) }}" class="list-button item-link" >{{ _('create plan item') }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
