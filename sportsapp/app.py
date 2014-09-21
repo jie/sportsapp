@@ -68,7 +68,10 @@ def account_signin(user_dict):
 
 @app.route('/')
 def index():
-    user = User.fetchone(pk=flask.session['user_id'], is_enable=1)
+    if flask.session.get('user_id'):
+        user = User.fetchone(pk=flask.session['user_id'], is_enable=1)
+    else:
+        user = None
     return flask.render_template('index.html', user=user)
 
 
@@ -207,7 +210,8 @@ def set_plan_item(pk):
     plan = Plan.fetchone(pk=pk, user_id=user_id, is_enable=1)
     if not plan:
         raise error.PlanNoteFound()
-    kinds = NoteKind.fetchall(user_id=user_id, is_enable=1, order=NoteKind.create_at.desc())
+    kinds = NoteKind.fetchall(
+        user_id=user_id, is_enable=1, order=NoteKind.create_at.desc())
     return flask.render_template('plan_set_item.html', plan=plan, kinds=kinds)
 
 
